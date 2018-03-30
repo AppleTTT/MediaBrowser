@@ -1,0 +1,32 @@
+PODS:
+  - FSPagerView (0.7.1)
+  - MBProgressHUD (1.1.0)
+  - Permission/Core (2.0.4)
+  - Permission/Photos (2.0.4):
+    - Permission/Core
+  - SnapKit (4.0.0)
+  - SwiftDate (4.5.1)
+  - SwiftyTimer (2.0.0)
+  - XLPagerTabStrip (8.0.0)
+
+DEPENDENCIES:
+  - FSPagerView
+  - MBProgressHUD
+  - Permission/Photos
+  - SnapKit
+  - SwiftDate
+  - SwiftyTimer
+  - XLPagerTabStrip
+
+SPEC CHECKSUMS:
+  FSPagerView: 958aba39684e1573755ddcfcc29f7eebb8413cee
+  MBProgressHUD: e7baa36a220447d8aeb12769bf0585582f3866d9
+  Permission: 6853b9694e66a6c9197468c66d1935c3629cbf9c
+  SnapKit: a42d492c16e80209130a3379f73596c3454b7694
+  SwiftDate: 7b56d42a221f582047287deb256b23fc5ed49a60
+  SwiftyTimer: 2efd74b060d69ad4f1496baf5bbedbe132125fcf
+  XLPagerTabStrip: d1ab378af0923320ec0b5eab11d7b2f803d31261
+
+PODFILE CHECKSUM: cfab1ef0126a80ed779c07ee7fc81e2a8cbc8d18
+
+COCOAPODS: 1.4.0

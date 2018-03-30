@@ -1,0 +1,6 @@
+framework module Pods_LQPlayerTests {
+  umbrella header "Pods-LQPlayerTests-umbrella.h"
+
+  export *
+  module * { export * }
+}
