@@ -222,7 +222,6 @@ class VideoBrowserCell: PhotoBrowserCell {
                 self.autoFadeOutControlViewWithAnimation()
             }
         }
-        
     }
     
     private func preparePlayer() {
