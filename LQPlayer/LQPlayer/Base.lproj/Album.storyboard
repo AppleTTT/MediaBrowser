@@ -4,6 +4,7 @@
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -12,7 +13,7 @@
         <!--Album-->
         <scene sceneID="RgD-Dw-Ed5">
             <objects>
-                <navigationController storyboardIdentifier="AlbumNavigationController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Lbl-uv-qq1" sceneMemberID="viewController">
+                <navigationController storyboardIdentifier="AlbumNavigationController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="Lbl-uv-qq1" customClass="AlbumNavigationController" customModule="LQPlayer" customModuleProvider="target" sceneMemberID="viewController">
                     <tabBarItem key="tabBarItem" title="Album" id="6OW-pW-GRd"/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="LKg-Kj-Y5v">
                         <rect key="frame" x="0.0" y="20" width="375" height="44"/>
@@ -26,10 +27,10 @@
             </objects>
             <point key="canvasLocation" x="-449" y="-385"/>
         </scene>
-        <!--Album Collection View Controller-->
+        <!--Asset Grid View Controller-->
         <scene sceneID="ZE7-dv-6fC">
             <objects>
-                <viewController id="z3k-GD-mca" customClass="AlbumCollectionViewController" customModule="LQPlayer" sceneMemberID="viewController">
+                <viewController id="z3k-GD-mca" customClass="AssetGridViewController" customModule="LQPlayer" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="W2i-pP-14V">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

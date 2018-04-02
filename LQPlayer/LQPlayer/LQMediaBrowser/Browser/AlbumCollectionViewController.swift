@@ -103,12 +103,12 @@ extension AlbumCollectionViewController: UITableViewDelegate {
         case .smartAlbums:
             let collection = smartAlbums.object(at: indexPath.row)
             assetGirdVC.fetchResult = PHAsset.fetchAssets(in: collection, options: nil)
-            assetGirdVC.assetCollection = collection
+//            assetGirdVC.assetCollection = collection
             
         case .userCollections:
             guard let collection = userCollections.object(at: indexPath.row) as? PHAssetCollection else { fatalError("expected asset collection") }
             assetGirdVC.fetchResult = PHAsset.fetchAssets(in: collection, options: nil)
-            assetGirdVC.assetCollection = collection
+//            assetGirdVC.assetCollection = collection
         }
         self.navigationController?.pushViewController(assetGirdVC, animated: true)
     }

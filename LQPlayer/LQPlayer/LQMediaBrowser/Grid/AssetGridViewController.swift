@@ -14,11 +14,8 @@ class AssetGridViewController: UIViewController {
 
     //MARK:- Properties
     var collectionView: UICollectionView!
-    
     /// 所有图片
     var fetchResult: PHFetchResult<PHAsset>!
-    /// 指定相册图片
-    var assetCollection: PHAssetCollection!
     var sectionDic = [String: Array<AssetModel>]()
     var allKeys = [String]()
     var data = Array<PHAsset>()
@@ -29,19 +26,55 @@ class AssetGridViewController: UIViewController {
     fileprivate var thumbnailSize: CGSize!
     fileprivate var previousPreheatRect = CGRect.zero
     
-    
     //MARK:- Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        prepareData()
+        initUI()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateItemSize()
+        self.navigationController?.setNavigationBarHidden(true, animated: false)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        updateCachedAssets()
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        self.navigationController?.setNavigationBarHidden(false, animated: false)
+    }
+    
+    // MARK:- Layout
+    override func viewWillLayoutSubviews() {
+        super.viewWillLayoutSubviews()
+        updateItemSize()
+    }
+    
+    
+    
+    // MARK:- Actions
+   
+    
+    //MARK:- Private funcs
+    private func initUI() {
+        let layout = UICollectionViewFlowLayout.init()
+        collectionView = UICollectionView.init(frame: view.bounds, collectionViewLayout: layout)
+        collectionView.delegate  = self
+        collectionView.dataSource = self
+        collectionView.backgroundColor =  UIColor.white
+        collectionView.register(GridViewCell.self, forCellWithReuseIdentifier: String(describing: GridViewCell.self))
+        collectionView.register(GirdReusableView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier:String(describing: GirdReusableView.self))
+        view.addSubview(collectionView)
+    }
+    
+    private func prepareData() {
         resetCachedAssets()
-        
-        if fetchResult == nil {
-            let allPhotosOptions = PHFetchOptions()
-            allPhotosOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
-            fetchResult = PHAsset.fetchAssets(with: allPhotosOptions)
-        }
-        
+        fetchResult = LQMdiaBrowserManager.allPhotos
         //准备数据源，将照片按照每天分组
         fetchResult.enumerateObjects { (asset, _, _) in
             let dateString = asset.creationDate?.dateToString()
@@ -59,93 +92,11 @@ class AssetGridViewController: UIViewController {
         allKeys = Array(sectionDic.keys)
         allKeys = allKeys.sorted(by: >)
         // 获取 mediaBrowser 里面的数据
-//        for string in allKeys {
-//            if sectionDic[string] != nil {
-//                data += Array(sectionDic[string]!)
-//            }
-//        }
-
-        let layout = UICollectionViewFlowLayout.init()
-        collectionView = UICollectionView.init(frame: view.bounds, collectionViewLayout: layout)
-        collectionView.delegate  = self
-        collectionView.dataSource = self
-        collectionView.backgroundColor =  UIColor.white
-        collectionView.register(GridViewCell.self, forCellWithReuseIdentifier: String(describing: GridViewCell.self))
-        collectionView.register(GirdReusableView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier:String(describing: GirdReusableView.self))
-        view.addSubview(collectionView)
-        
-//        let backgroundImageView = UIImageView.init(frame: view.bounds)
-//        backgroundImageView.image = #imageLiteral(resourceName: "backgroundImage")
-//        collectionView.backgroundView = backgroundImageView
-//
-//
-//        self.navigationController?.navigationBar.setBackgroundImage(#imageLiteral(resourceName: "backgroundImage"), for: .default)
-        
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        setupNavBar()
-        setupUI()
-        
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        updateCachedAssets()
-    }
-    
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-    }
-    
-    // MARK:- Layout
-    override func viewWillLayoutSubviews() {
-        super.viewWillLayoutSubviews()
-        updateItemSize()
-    }
-    
-    
-    
-    // MARK:- Actions
-    @objc func addAssetAction(_ barButton: UIBarButtonItem) {
-        // Create a dummy image of a random solid color and random orientation.
-        let size = (arc4random_uniform(2) == 0) ?
-            CGSize(width: 400, height: 300) :
-            CGSize(width: 300, height: 400)
-        let renderer = UIGraphicsImageRenderer(size: size)
-        let image = renderer.image { context in
-            UIColor(hue: CGFloat(arc4random_uniform(100)) / 100,
-                    saturation: 1, brightness: 1, alpha: 1).setFill()
-            context.fill(context.format.bounds)
-        }
-        
-        // Add it to the photo library.
-        PHPhotoLibrary.shared().performChanges({
-            let creationRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
-            if let assetCollection = self.assetCollection {
-                let addAssetRequest = PHAssetCollectionChangeRequest(for: assetCollection)
-                addAssetRequest?.addAssets([creationRequest.placeholderForCreatedAsset!] as NSArray)
-            }
-        }, completionHandler: {success, error in
-            if !success { print("error creating asset: \(String(describing: error))") }
-        })
-    }
-    
-    //MARK:- Private funcs
-    private func setupUI() {
-        
-        updateItemSize()
-    }
-    
-    private func setupNavBar() {
-        
-        if assetCollection == nil ||  assetCollection.canPerform(.addContent) {
-            let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: Selector.addAssetAction)
-            self.navigationItem.rightBarButtonItem = addButton
-        }
-        
+        //        for string in allKeys {
+        //            if sectionDic[string] != nil {
+        //                data += Array(sectionDic[string]!)
+        //            }
+        //        }
     }
     
     private func updateItemSize() {
@@ -166,7 +117,6 @@ class AssetGridViewController: UIViewController {
             //TODO: 替换成 Manager 里面的参数
             layout.headerReferenceSize = CGSize.init(width: 100, height: 20)
         }
-        
         // Determine the size of the thumbnails to request from the PHCachingImageManager
         let scale = UIScreen.main.scale
         thumbnailSize = CGSize(width: itemSize.width * scale, height: itemSize.height * scale)
@@ -175,11 +125,9 @@ class AssetGridViewController: UIViewController {
     private func updateCachedAssets() {
         // 当视图可见的时候才更新
         guard isViewLoaded && view.window != nil else { return }
-        
         // The preheat window is twice the height of the visible rect.
         let visibleRect = CGRect(origin: collectionView!.contentOffset, size: collectionView!.bounds.size)
         let preheatRect = visibleRect.insetBy(dx: 0, dy: -0.5 * visibleRect.height)
-        
         // Update only if the visible area is significantly different from the last preheated area.
         let delta = abs(preheatRect.midY - previousPreheatRect.midY)
         guard delta > view.bounds.height / 3 else { return }
@@ -310,7 +258,7 @@ extension AssetGridViewController: MediaBrowserViewControllerDelegate {
 }
 
 fileprivate extension Selector {
-    static let addAssetAction = #selector(AssetGridViewController.addAssetAction(_:))
+    
 }
 
 fileprivate extension UICollectionView {

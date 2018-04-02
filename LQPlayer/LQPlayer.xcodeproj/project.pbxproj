@@ -28,6 +28,7 @@
 		62F204AC206DEAFE00B7E9FF /* TabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F204AB206DEAFE00B7E9FF /* TabBarViewController.swift */; };
 		62F204B3206DF94F00B7E9FF /* Album.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62F204AF206DF94F00B7E9FF /* Album.storyboard */; };
 		62F204B4206DF94F00B7E9FF /* Other.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62F204B1206DF94F00B7E9FF /* Other.storyboard */; };
+		62F204B6206E29BE00B7E9FF /* AlbumNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F204B5206E29BE00B7E9FF /* AlbumNavigationController.swift */; };
 		62F7C1A8205114FA009E3F4E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F7C1A7205114FA009E3F4E /* AppDelegate.swift */; };
 		62F7C1AA205114FA009E3F4E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F7C1A9205114FA009E3F4E /* ViewController.swift */; };
 		62F7C1AD205114FA009E3F4E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62F7C1AB205114FA009E3F4E /* Main.storyboard */; };
@@ -82,6 +83,7 @@
 		62F204AB206DEAFE00B7E9FF /* TabBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarViewController.swift; sourceTree = "<group>"; };
 		62F204B0206DF94F00B7E9FF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Album.storyboard; sourceTree = "<group>"; };
 		62F204B2206DF94F00B7E9FF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Other.storyboard; sourceTree = "<group>"; };
+		62F204B5206E29BE00B7E9FF /* AlbumNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumNavigationController.swift; sourceTree = "<group>"; };
 		62F7C1A4205114FA009E3F4E /* LQPlayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LQPlayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		62F7C1A7205114FA009E3F4E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		62F7C1A9205114FA009E3F4E /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -216,6 +218,7 @@
 				62F7C1A7205114FA009E3F4E /* AppDelegate.swift */,
 				62F7C1A9205114FA009E3F4E /* ViewController.swift */,
 				62F204AB206DEAFE00B7E9FF /* TabBarViewController.swift */,
+				62F204B5206E29BE00B7E9FF /* AlbumNavigationController.swift */,
 				62F7C1D5205120F3009E3F4E /* PhotoCollectionViewCell.swift */,
 				6242BCBB2068F5D000DC53C4 /* Store */,
 				628D0C3B20623041008AB20F /* LQMediaBrowser */,
@@ -570,6 +573,7 @@
 				628D0C4120635FE7008AB20F /* LQMdeiaBrowserManager.swift in Sources */,
 				6242BCB220660C9600DC53C4 /* GridViewCell.swift in Sources */,
 				62F7C1AA205114FA009E3F4E /* ViewController.swift in Sources */,
+				62F204B6206E29BE00B7E9FF /* AlbumNavigationController.swift in Sources */,
 				6242BCC92069F59900DC53C4 /* PhotoBrowserCell.swift in Sources */,
 				62F204AC206DEAFE00B7E9FF /* TabBarViewController.swift in Sources */,
 				6242BCBD2068F5E000DC53C4 /* Store.swift in Sources */,
