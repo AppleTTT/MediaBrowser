@@ -21,8 +21,6 @@ import Photos
     @objc optional func deleteMedia(_ cell: PhotoBrowserCell)
 }
 
-
-
 class PhotoBrowserCell: UICollectionViewCell {
     
     weak var photoBrowserCellDelegate: PhotoBrowserCellDelegate?

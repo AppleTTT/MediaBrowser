@@ -58,15 +58,7 @@ class MediaBrowserCollectionViewDataSource: NSObject, UICollectionViewDataSource
 
         reuseableView.backgroundColor = UIColor.black
         return reuseableView
-    }
-    
-    
-    
-    
-    
-    
-    
-    
+    } 
 }
 
 

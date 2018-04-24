@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13771" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Lbl-uv-qq1">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14109" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="Lbl-uv-qq1">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13772"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14088"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -43,5 +43,85 @@
             </objects>
             <point key="canvasLocation" x="254" y="-385"/>
         </scene>
+        <!--Player View Controller-->
+        <scene sceneID="100-BC-L3T">
+            <objects>
+                <viewController id="ocy-AA-a7R" customClass="PlayerViewController" customModule="LQPlayer" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="653-Gu-EMY" customClass="PlayerView" customModule="LQPlayer" customModuleProvider="target">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="mWd-SB-gmg">
+                                <rect key="frame" x="0.0" y="20" width="375" height="647"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="播放时间" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9gU-wE-OWa">
+                                        <rect key="frame" x="8" y="606" width="70" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="总时间" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gvI-aU-Mfd">
+                                        <rect key="frame" x="315" y="606" width="52" height="21"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="HWl-E0-a63">
+                                        <rect key="frame" x="154.5" y="290.5" width="66" height="66"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="66" id="Thw-pf-A0e"/>
+                                            <constraint firstAttribute="width" constant="66" id="tsF-y8-QJ0"/>
+                                        </constraints>
+                                        <state key="normal" image="播放大"/>
+                                        <state key="selected" image="暂停大"/>
+                                        <connections>
+                                            <action selector="playPauseButtonClicked:" destination="ocy-AA-a7R" eventType="touchUpInside" id="Pph-dh-Lks"/>
+                                        </connections>
+                                    </button>
+                                    <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="juR-xQ-rkT">
+                                        <rect key="frame" x="82" y="601.5" width="229" height="31"/>
+                                        <connections>
+                                            <action selector="timeSliderDidChanged:" destination="ocy-AA-a7R" eventType="valueChanged" id="36p-WE-LSF"/>
+                                        </connections>
+                                    </slider>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="juR-xQ-rkT" firstAttribute="centerY" secondItem="9gU-wE-OWa" secondAttribute="centerY" id="689-EB-q9a"/>
+                                    <constraint firstItem="HWl-E0-a63" firstAttribute="centerY" secondItem="mWd-SB-gmg" secondAttribute="centerY" id="D9b-X1-whg"/>
+                                    <constraint firstItem="gvI-aU-Mfd" firstAttribute="leading" secondItem="juR-xQ-rkT" secondAttribute="trailing" constant="6" id="HTZ-mI-Fxy"/>
+                                    <constraint firstAttribute="bottom" secondItem="9gU-wE-OWa" secondAttribute="bottom" constant="20" id="L8W-wS-fJm"/>
+                                    <constraint firstItem="juR-xQ-rkT" firstAttribute="leading" secondItem="9gU-wE-OWa" secondAttribute="trailing" constant="6" id="OaC-js-I9h"/>
+                                    <constraint firstItem="gvI-aU-Mfd" firstAttribute="centerY" secondItem="9gU-wE-OWa" secondAttribute="centerY" id="f1b-9k-U0j"/>
+                                    <constraint firstAttribute="trailing" secondItem="gvI-aU-Mfd" secondAttribute="trailing" constant="8" id="lqc-EF-7uA"/>
+                                    <constraint firstItem="HWl-E0-a63" firstAttribute="centerX" secondItem="mWd-SB-gmg" secondAttribute="centerX" id="tC0-Tx-jRS"/>
+                                    <constraint firstItem="9gU-wE-OWa" firstAttribute="leading" secondItem="mWd-SB-gmg" secondAttribute="leading" constant="8" id="tWM-WI-amu"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="mWd-SB-gmg" firstAttribute="trailing" secondItem="Zxs-ew-hIO" secondAttribute="trailing" id="1fG-Ja-gVp"/>
+                            <constraint firstItem="mWd-SB-gmg" firstAttribute="leading" secondItem="Zxs-ew-hIO" secondAttribute="leading" id="Hcs-DV-ToC"/>
+                            <constraint firstItem="mWd-SB-gmg" firstAttribute="top" secondItem="Zxs-ew-hIO" secondAttribute="top" id="i2d-kM-tWF"/>
+                            <constraint firstItem="mWd-SB-gmg" firstAttribute="bottom" secondItem="Zxs-ew-hIO" secondAttribute="bottom" id="l9a-IL-mWT"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="Zxs-ew-hIO"/>
+                    </view>
+                    <connections>
+                        <outlet property="playPauseButton" destination="HWl-E0-a63" id="ddJ-7K-3Jl"/>
+                        <outlet property="playTimeLabel" destination="9gU-wE-OWa" id="Fal-P9-qhs"/>
+                        <outlet property="timeSlider" destination="juR-xQ-rkT" id="Dv6-Yg-lsl"/>
+                        <outlet property="totalTimeLabel" destination="gvI-aU-Mfd" id="ny9-jJ-8G2"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="tWn-Uj-7si" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="964" y="-385.45727136431788"/>
+        </scene>
     </scenes>
+    <resources>
+        <image name="播放大" width="65" height="65"/>
+        <image name="暂停大" width="65" height="65"/>
+    </resources>
 </document>

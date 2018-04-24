@@ -25,6 +25,10 @@
 		628D0C3D2062309D008AB20F /* AlbumCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 628D0C3C2062309D008AB20F /* AlbumCollectionViewController.swift */; };
 		628D0C3F2063505C008AB20F /* AssetGridViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 628D0C3E2063505C008AB20F /* AssetGridViewController.swift */; };
 		628D0C4120635FE7008AB20F /* LQMdeiaBrowserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 628D0C4020635FE7008AB20F /* LQMdeiaBrowserManager.swift */; };
+		62B8D1DE208DCB4900D37887 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B8D1DD208DCB4900D37887 /* PlayerView.swift */; };
+		62B8D1E1208DCBED00D37887 /* VideoBrowser1Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B8D1DF208DCBED00D37887 /* VideoBrowser1Cell.swift */; };
+		62B8D1E2208DCBED00D37887 /* VideoBrowser1Cell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 62B8D1E0208DCBED00D37887 /* VideoBrowser1Cell.xib */; };
+		62B8D1E4208DD36700D37887 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B8D1E3208DD36700D37887 /* PlayerViewController.swift */; };
 		62F204AC206DEAFE00B7E9FF /* TabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F204AB206DEAFE00B7E9FF /* TabBarViewController.swift */; };
 		62F204B3206DF94F00B7E9FF /* Album.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62F204AF206DF94F00B7E9FF /* Album.storyboard */; };
 		62F204B4206DF94F00B7E9FF /* Other.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62F204B1206DF94F00B7E9FF /* Other.storyboard */; };
@@ -80,6 +84,10 @@
 		628D0C3C2062309D008AB20F /* AlbumCollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumCollectionViewController.swift; sourceTree = "<group>"; };
 		628D0C3E2063505C008AB20F /* AssetGridViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssetGridViewController.swift; sourceTree = "<group>"; };
 		628D0C4020635FE7008AB20F /* LQMdeiaBrowserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LQMdeiaBrowserManager.swift; sourceTree = "<group>"; };
+		62B8D1DD208DCB4900D37887 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
+		62B8D1DF208DCBED00D37887 /* VideoBrowser1Cell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoBrowser1Cell.swift; sourceTree = "<group>"; };
+		62B8D1E0208DCBED00D37887 /* VideoBrowser1Cell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = VideoBrowser1Cell.xib; sourceTree = "<group>"; };
+		62B8D1E3208DD36700D37887 /* PlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
 		62F204AB206DEAFE00B7E9FF /* TabBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarViewController.swift; sourceTree = "<group>"; };
 		62F204B0206DF94F00B7E9FF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Album.storyboard; sourceTree = "<group>"; };
 		62F204B2206DF94F00B7E9FF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Other.storyboard; sourceTree = "<group>"; };
@@ -183,6 +191,10 @@
 				6242BCC22068FCEF00DC53C4 /* BrowserCollectionView.swift */,
 				6242BCC82069F59900DC53C4 /* PhotoBrowserCell.swift */,
 				6242BCCA2069F5CE00DC53C4 /* VideoBrowserCell.swift */,
+				62B8D1DF208DCBED00D37887 /* VideoBrowser1Cell.swift */,
+				62B8D1E0208DCBED00D37887 /* VideoBrowser1Cell.xib */,
+				62B8D1E3208DD36700D37887 /* PlayerViewController.swift */,
+				62B8D1DD208DCB4900D37887 /* PlayerView.swift */,
 				6242BCB72068F48200DC53C4 /* ScaleAnimator.swift */,
 				6242BCB82068F48200DC53C4 /* ScaleAnimatorCoordinator.swift */,
 				6242BCBE2068F90B00DC53C4 /* MediaBrowserLayout.swift */,
@@ -383,6 +395,7 @@
 				62F204B4206DF94F00B7E9FF /* Other.storyboard in Resources */,
 				62F7C1B2205114FA009E3F4E /* LaunchScreen.storyboard in Resources */,
 				62F7C1AF205114FA009E3F4E /* Assets.xcassets in Resources */,
+				62B8D1E2208DCBED00D37887 /* VideoBrowser1Cell.xib in Resources */,
 				62F7C1AD205114FA009E3F4E /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -576,6 +589,7 @@
 				62F204B6206E29BE00B7E9FF /* AlbumNavigationController.swift in Sources */,
 				6242BCC92069F59900DC53C4 /* PhotoBrowserCell.swift in Sources */,
 				62F204AC206DEAFE00B7E9FF /* TabBarViewController.swift in Sources */,
+				62B8D1E1208DCBED00D37887 /* VideoBrowser1Cell.swift in Sources */,
 				6242BCBD2068F5E000DC53C4 /* Store.swift in Sources */,
 				62F7C1A8205114FA009E3F4E /* AppDelegate.swift in Sources */,
 				628D0C3D2062309D008AB20F /* AlbumCollectionViewController.swift in Sources */,
@@ -583,12 +597,14 @@
 				6242BCC12068FA4300DC53C4 /* MediaBrowserViewControllerDelegate.swift in Sources */,
 				6242BCBF2068F90B00DC53C4 /* MediaBrowserLayout.swift in Sources */,
 				6242BCBA2068F48200DC53C4 /* ScaleAnimatorCoordinator.swift in Sources */,
+				62B8D1E4208DD36700D37887 /* PlayerViewController.swift in Sources */,
 				62F7C1D6205120F3009E3F4E /* PhotoCollectionViewCell.swift in Sources */,
 				6242BCC52068FD9600DC53C4 /* MediaBrowserCollectionViewDataSource.swift in Sources */,
 				628D0C3F2063505C008AB20F /* AssetGridViewController.swift in Sources */,
 				6242BCB62068DAA400DC53C4 /* MediaBrowserViewController.swift in Sources */,
 				6242BCCF206B770600DC53C4 /* Utils.swift in Sources */,
 				6242BCC72069D90900DC53C4 /* AssetModel.swift in Sources */,
+				62B8D1DE208DCB4900D37887 /* PlayerView.swift in Sources */,
 				6242BCB92068F48200DC53C4 /* ScaleAnimator.swift in Sources */,
 				6242BCCB2069F5CE00DC53C4 /* VideoBrowserCell.swift in Sources */,
 				6242BCC32068FCEF00DC53C4 /* BrowserCollectionView.swift in Sources */,
@@ -777,6 +793,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 8F9SPP93T2;
 				INFOPLIST_FILE = LQPlayer/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.laiqutech.LQPlayer;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -793,6 +810,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 8F9SPP93T2;
 				INFOPLIST_FILE = LQPlayer/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.laiqutech.LQPlayer;
 				PRODUCT_NAME = "$(TARGET_NAME)";

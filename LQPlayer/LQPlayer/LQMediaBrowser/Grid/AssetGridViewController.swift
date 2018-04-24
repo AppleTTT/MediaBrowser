@@ -54,12 +54,6 @@ class AssetGridViewController: UIViewController {
         super.viewWillLayoutSubviews()
         updateItemSize()
     }
-    
-    
-    
-    // MARK:- Actions
-   
-    
     //MARK:- Private funcs
     private func initUI() {
         let layout = UICollectionViewFlowLayout.init()
@@ -91,12 +85,6 @@ class AssetGridViewController: UIViewController {
         }
         allKeys = Array(sectionDic.keys)
         allKeys = allKeys.sorted(by: >)
-        // 获取 mediaBrowser 里面的数据
-        //        for string in allKeys {
-        //            if sectionDic[string] != nil {
-        //                data += Array(sectionDic[string]!)
-        //            }
-        //        }
     }
     
     private func updateItemSize() {
@@ -125,14 +113,10 @@ class AssetGridViewController: UIViewController {
     private func updateCachedAssets() {
         // 当视图可见的时候才更新
         guard isViewLoaded && view.window != nil else { return }
-        // The preheat window is twice the height of the visible rect.
         let visibleRect = CGRect(origin: collectionView!.contentOffset, size: collectionView!.bounds.size)
         let preheatRect = visibleRect.insetBy(dx: 0, dy: -0.5 * visibleRect.height)
-        // Update only if the visible area is significantly different from the last preheated area.
         let delta = abs(preheatRect.midY - previousPreheatRect.midY)
         guard delta > view.bounds.height / 3 else { return }
-        
-        // Compute the assets to start caching and to stop caching.
         let (addedRects, removedRects) = differencesBetweenRects(previousPreheatRect, preheatRect)
         let addedAssets = addedRects
             .flatMap { rect in collectionView!.indexPathsForElements(in: rect) }
@@ -141,13 +125,10 @@ class AssetGridViewController: UIViewController {
             .flatMap { rect in collectionView!.indexPathsForElements(in: rect) }
             .map { indexPath in fetchResult.object(at: indexPath.item) }
         
-        // Update the assets the PHCachingImageManager is caching.
         imageManager.startCachingImages(for: addedAssets,
                                         targetSize: thumbnailSize, contentMode: .aspectFill, options: nil)
         imageManager.stopCachingImages(for: removedAssets,
                                        targetSize: thumbnailSize, contentMode: .aspectFill, options: nil)
-        
-        // Store the preheat rect to compare against in the future.
         previousPreheatRect = preheatRect
     }
     
