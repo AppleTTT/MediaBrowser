@@ -205,8 +205,12 @@ extension AssetGridViewController: UICollectionViewDataSource {
             fatalError("unexpected cell in collection view")
         }
         
-        if asset.mediaSubtypes.contains(.photoLive) {
-            cell.livePhotoBadgeImage = PHLivePhotoView.livePhotoBadgeImage(options: .overContent)
+        if #available(iOS 9.1, *) {
+            if asset.mediaSubtypes.contains(.photoLive) {
+                cell.livePhotoBadgeImage = PHLivePhotoView.livePhotoBadgeImage(options: .overContent)
+            }
+        } else {
+            // Fallback on earlier versions
         }
         cell.representedAssetIdentifier = asset.localIdentifier
         imageManager.requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: nil, resultHandler: { image, _ in

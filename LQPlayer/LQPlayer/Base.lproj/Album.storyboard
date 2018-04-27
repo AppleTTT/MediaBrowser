@@ -46,7 +46,7 @@
         <!--Player View Controller-->
         <scene sceneID="100-BC-L3T">
             <objects>
-                <viewController id="ocy-AA-a7R" customClass="PlayerViewController" customModule="LQPlayer" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="PlayerViewController" id="ocy-AA-a7R" customClass="PlayerViewController" customModule="LQPlayer" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="653-Gu-EMY" customClass="PlayerView" customModule="LQPlayer" customModuleProvider="target">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>

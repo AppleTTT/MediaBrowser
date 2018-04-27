@@ -17,6 +17,7 @@ target 'LQPlayer' do
   pod 'FSPagerView'
   pod 'SwiftyTimer'
   pod 'MBProgressHUD'
+  pod 'Reveal-SDK', :git => 'https://git.coding.net/kakukeme/Reveal-SDK.git', :configurations => ['Debug']
   
   target 'LQPlayerTests' do
     inherit! :search_paths

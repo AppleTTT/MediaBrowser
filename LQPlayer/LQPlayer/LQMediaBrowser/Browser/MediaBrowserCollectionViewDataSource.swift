@@ -32,9 +32,9 @@ class MediaBrowserCollectionViewDataSource: NSObject, UICollectionViewDataSource
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         guard indexPath.section != keysSequence.count else { fatalError() }
-        let asset = dataDictionary[keysSequence[indexPath.section]]![indexPath.item].asset!
+        let asset = dataDictionary[keysSequence[indexPath.section]]![indexPath.item].asset
         
-        if asset.mediaType == .image {
+        if asset?.mediaType == .image {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: photoCellReuseId, for: indexPath) as! PhotoBrowserCell
             let image = owner?.mediaBrowserDelegate?.mediaBrowser(owner, thumbnailImageForIndexPath: indexPath)
             cell.refreshCell(asset: asset, placeholder: image)
@@ -42,11 +42,12 @@ class MediaBrowserCollectionViewDataSource: NSObject, UICollectionViewDataSource
             return cell
         }
         
-        if asset.mediaType == .video {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: videoCellResueId, for: indexPath) as! VideoBrowserCell
+        if asset?.mediaType == .video {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: video1CellResueId, for: indexPath) as! VideoBrowser1Cell
             let image = owner?.mediaBrowserDelegate?.mediaBrowser(owner, thumbnailImageForIndexPath: indexPath)
+//            cell.refreshCell(asset: asset, placeholder: image)
+//            cell.photoBrowserCellDelegate = owner
             cell.refreshCell(asset: asset, placeholder: image)
-            cell.photoBrowserCellDelegate = owner
             return cell
         }
         return UICollectionViewCell.init()

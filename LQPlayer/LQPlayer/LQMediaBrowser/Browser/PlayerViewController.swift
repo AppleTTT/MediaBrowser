@@ -8,6 +8,7 @@
 
 import UIKit
 import AVKit
+import Photos
 
 private var playerViewControllerKVOContext = 0
 
@@ -106,6 +107,11 @@ class PlayerViewController: UIViewController {
         }
     }
     
+    static let assetKeysRequiredToPlay = [
+        "playable",
+        "hasProtectedContent"
+    ]
+    
     var currentTime: Double {
         get {
             return CMTimeGetSeconds(player.currentTime())
@@ -123,21 +129,13 @@ class PlayerViewController: UIViewController {
     }
     
     var timeObserverToken: AnyObject?
-    // Attempt to load and test these asset keys before playing
-    static let assetKeysRequiredToPlay = [
-        "playable",
-        "hasProtectedContent"
-    ]
+    
+    var asset:PHAsset?
     
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
         
-        playerRateObserver = player.observe(\AVPlayer.rate, options: [.new, .initial]) { [weak self] (player, _) in
-            guard let strongSelf = self else { return }
-            // Update playPauseButton type
-            let newRate = player.rate
-            strongSelf.playPauseButton.isSelected = newRate != 0.0
-        }
+        
     }
     
     // MARK:- IBOutlets
@@ -170,6 +168,12 @@ class PlayerViewController: UIViewController {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        playerRateObserver = player.observe(\AVPlayer.rate, options: [.new, .initial]) { [weak self] (player, _) in
+            guard let strongSelf = self else { return }
+            // Update playPauseButton type
+            let newRate = player.rate
+            strongSelf.playPauseButton.isSelected = newRate != 0.0
+        }
     }
     
     // MARK:- View Handling
@@ -177,6 +181,17 @@ class PlayerViewController: UIViewController {
         super.viewWillAppear(animated)
         
         playerView.playerLayer.player = player
+        
+        let options = PHVideoRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.deliveryMode = .automatic
+        
+        PHImageManager.default().requestPlayerItem(forVideo: asset!, options: options, resultHandler: { playerItem, _ in
+            DispatchQueue.main.sync {
+                guard playerItem != nil else { return }
+                self.playerItem = playerItem
+            }
+        })
         
         timeSlider.translatesAutoresizingMaskIntoConstraints = true
         timeSlider.autoresizingMask = .flexibleWidth
@@ -190,6 +205,12 @@ class PlayerViewController: UIViewController {
         removeObserver(self, forKeyPath: #keyPath(PlayerViewController.player.currentItem.duration), context: &playerViewControllerKVOContext)
         removeObserver(self, forKeyPath: #keyPath(PlayerViewController.player.currentItem.status), context: &playerViewControllerKVOContext)
         removeObserver(self, forKeyPath: #keyPath(PlayerViewController.player.rate), context: &playerViewControllerKVOContext)
+    }
+    
+    // MARK:- APIs
+    func setupPlayback(asset: PHAsset?) {
+        guard let asset = asset else { return }
+        self.asset = asset
     }
 
     
@@ -220,7 +241,6 @@ class PlayerViewController: UIViewController {
         
         return affectedKeyPathsMappingByKey[key] ?? super.keyPathsForValuesAffectingValue(forKey: key)
     }
-    
 }
 
 extension PlayerViewController {

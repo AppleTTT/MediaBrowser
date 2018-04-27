@@ -68,12 +68,17 @@ class PhotoBrowserCell: UICollectionViewCell {
         initUI()
     }
     
-    required public init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+    
+    override func awakeFromNib() {
+        super.awakeFromNib()
     }
     
     //MARK:- APIs
-    func refreshCell(asset: PHAsset!, placeholder: UIImage?) {
+    func refreshCell(asset: PHAsset?, placeholder: UIImage?) {
+         guard let asset = asset else { return }
         imageView.contentMode = UIViewContentMode.scaleAspectFill
         imageView.image = placeholder
         self.asset = asset
@@ -178,7 +183,6 @@ class PhotoBrowserCell: UICollectionViewCell {
         scrollView.frame = contentView.bounds
         scrollView.setZoomScale(1.0, animated: false)
         imageView.frame = fitFrame
-        scrollView.setZoomScale(1.0, animated: false)
     }
     
     private func initUI() {
