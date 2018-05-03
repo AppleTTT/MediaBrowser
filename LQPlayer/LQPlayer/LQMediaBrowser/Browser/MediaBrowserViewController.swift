@@ -8,10 +8,10 @@
 
 import UIKit
 import Photos
+import SnapKit
 
 let photoCellReuseId = "photoCell"
 let videoCellResueId = "videoCell"
-let video1CellResueId = "video1Cell"
 let headerResueId    = "headerResueId"
 
 class MediaBrowserViewController: UIViewController {
@@ -66,7 +66,6 @@ class MediaBrowserViewController: UIViewController {
         collectionView.delegate = self
         collectionView.register(PhotoBrowserCell.self, forCellWithReuseIdentifier: photoCellReuseId)
         collectionView.register(VideoBrowserCell.self, forCellWithReuseIdentifier: videoCellResueId)
-        collectionView.register(UINib(nibName: "VideoBrowser1Cell", bundle: nil), forCellWithReuseIdentifier: video1CellResueId)
         collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerResueId)
         return collectionView
         }()
@@ -154,8 +153,8 @@ class MediaBrowserViewController: UIViewController {
 extension MediaBrowserViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if cell is VideoBrowser1Cell {
-            let videoCell = cell as! VideoBrowser1Cell
+        if cell is VideoBrowserCell {
+            let videoCell = cell as! VideoBrowserCell
             videoCell.cellWillAppear()
         }
     }
@@ -175,9 +174,8 @@ extension MediaBrowserViewController: UICollectionViewDelegate {
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         guard lastCell != nil else { return }
-        if lastCell is VideoBrowser1Cell, !collectionView.visibleCells.contains(lastCell!) {
-            let videoBrowserCell = lastCell as! VideoBrowser1Cell
-//            videoBrowserCell.stopPlayer()
+        if lastCell is VideoBrowserCell, !collectionView.visibleCells.contains(lastCell!) {
+            let videoBrowserCell = lastCell as! VideoBrowserCell
             videoBrowserCell.cellDidDisappear()
         }
     }

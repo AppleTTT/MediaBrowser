@@ -14,7 +14,6 @@ import Photos
     func photoBrowserCell(_ cell: PhotoBrowserCell, didPanScale scale: CGFloat)
     /// dismiss 操作
     func photoBrowserDismiss(_ cell: PhotoBrowserCell)
-    
     /// 自定义 分享操作
     @objc optional func shareMedia(_ cell: PhotoBrowserCell)
     /// 自定义 删除操作
@@ -25,6 +24,14 @@ class PhotoBrowserCell: UICollectionViewCell {
     
     weak var photoBrowserCellDelegate: PhotoBrowserCellDelegate?
     let imageView = UIImageView()
+    let mainMaskView = UIView(frame: CGRect.zero)
+    let backButton = UIButton(type: .custom)
+    
+    let mediaDateLabel = UILabel(frame: CGRect.zero)
+    let mediaTimeLabel = UILabel(frame: CGRect.zero)
+    let shareButton = UIButton(type: .custom)
+    let deleteButton = UIButton(type: .custom)
+    
     /// 捏合手势放大图片时的最大允许比例
     var imageMaximumZoomScale: CGFloat = 2.0 {
         didSet { self.scrollView.maximumZoomScale = imageMaximumZoomScale }
@@ -72,17 +79,15 @@ class PhotoBrowserCell: UICollectionViewCell {
         super.init(coder: aDecoder)
     }
     
-    override func awakeFromNib() {
-        super.awakeFromNib()
-    }
-    
     //MARK:- APIs
     func refreshCell(asset: PHAsset?, placeholder: UIImage?) {
          guard let asset = asset else { return }
-        imageView.contentMode = UIViewContentMode.scaleAspectFill
+//        imageView.contentMode = UIViewContentMode.scaleAspectFill
         imageView.image = placeholder
         self.asset = asset
-        PHImageManager.default().requestImage(for: asset, targetSize: CGSize.init(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFill, options: nil) { (image, info) in
+        let options = PHImageRequestOptions()
+        options.deliveryMode = .highQualityFormat
+        PHImageManager.default().requestImage(for: asset, targetSize: CGSize.init(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: options) { (image, info) in
             if self.asset.localIdentifier == asset.localIdentifier && image != nil {
                 self.imageView.image = image
                 self.doLayout()
@@ -178,33 +183,68 @@ class PhotoBrowserCell: UICollectionViewCell {
         }
     }
     
+    @objc func sharePhoto() {
+        guard self.asset != nil else { return }
+//        delegate?.videoBrowserCellSharePhoto(self)
+    }
+    
+    @objc func deletePhoto(_ deleteButton: UIButton) {
+        guard self.asset != nil else { return }
+//        delegate?.videoBrowserCellDeletePhoto(self,deleteButton)
+    }
+    
+    @objc func dismiss() {
+//        delegate?.videoBrowserCellDismiss(self)
+    }
+    
+    
     private func doLayout() {
         guard shouldLayout else { return }
         scrollView.frame = contentView.bounds
         scrollView.setZoomScale(1.0, animated: false)
         imageView.frame = fitFrame
+        
+        var topPadding: CGFloat = 20
+        var bottomPadding1: CGFloat = 50
+        if #available(iOS 11.0, *),  UIScreen.main.bounds.height == 812 {
+            topPadding =  self.safeAreaInsets.top + 40
+            bottomPadding1 = self.safeAreaInsets.bottom + 90
+        }
+        
+        deleteButton.snp.updateConstraints { (make) in
+            make.right.equalTo(contentView.snp.right).offset(-10)
+            make.bottom.equalTo(contentView.snp.bottom).offset(-bottomPadding1)
+            make.width.equalTo(44)
+            make.height.equalTo(44)
+        }
+        
+        shareButton.snp.updateConstraints { (make) in
+            make.right.equalTo(contentView.snp.right).offset(-10)
+            make.bottom.equalTo(deleteButton.snp.top).offset(-20)
+            make.width.equalTo(44)
+            make.height.equalTo(44)
+        }
+        
+        backButton.snp.updateConstraints { (make) in
+            make.top.equalTo(contentView.snp.top).offset(topPadding)
+            make.left.equalTo(contentView.snp.left).offset(20)
+            make.width.equalTo(44)
+            make.height.equalTo(44)
+        }
+        
+        mediaDateLabel.snp.updateConstraints { (make) in
+            make.right.equalTo(contentView.snp.right).offset(-8)
+            make.top.equalTo(contentView.snp.top).offset(topPadding)
+        }
+        mediaTimeLabel.snp.updateConstraints { (make) in
+            make.right.equalTo(contentView.snp.right).offset(-8)
+            make.top.equalTo(mediaDateLabel.snp.bottom).offset(5)
+        }
+        
+        
     }
     
-    private func initUI() {
-        contentView.addSubview(scrollView)
-        scrollView.delegate = self
-        scrollView.maximumZoomScale = imageMaximumZoomScale
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.showsHorizontalScrollIndicator = false
-        if #available(iOS 11.0, *) {
-            scrollView.contentInsetAdjustmentBehavior = .never
-        }
-        scrollView.addSubview(imageView)
-        imageView.clipsToBounds = true
-        // 双击手势
-        let doubleTap = UITapGestureRecognizer(target: self, action: Selector.doubleTapAction)
-        doubleTap.numberOfTapsRequired = 2
-        contentView.addGestureRecognizer(doubleTap)
-        // 拖动手势
-        let pan = UIPanGestureRecognizer(target: self, action: Selector.panAction)
-        pan.delegate = self
-        contentView.addGestureRecognizer(pan)
-    }
+    
     
     //MARK:- Layout
     override func layoutSubviews() {
@@ -238,12 +278,73 @@ extension PhotoBrowserCell: UIGestureRecognizerDelegate {
     }
 }
 
-private extension Selector {
+fileprivate extension Selector {
     static let doubleTapAction = #selector(PhotoBrowserCell.doubleTapAction(_:))
     static let panAction = #selector(PhotoBrowserCell.panAction(_:))
+    
+    static let sharePhoto = #selector(PhotoBrowserCell.sharePhoto)
+    static let deletePhoto = #selector(PhotoBrowserCell.deletePhoto(_:))
+    static let dismiss = #selector(PhotoBrowserCell.dismiss)
 }
 
+extension PhotoBrowserCell {
+    // MARK:- UI
+    func initUI() {
+        contentView.addSubview(scrollView)
+        scrollView.delegate = self
+        scrollView.maximumZoomScale = imageMaximumZoomScale
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+        if #available(iOS 11.0, *) {
+            scrollView.contentInsetAdjustmentBehavior = .never
+        }
+        scrollView.addSubview(imageView)
+        imageView.clipsToBounds = true
+        
+        mainMaskView.frame = contentView.bounds
+        mainMaskView.backgroundColor = .clear
+        contentView.addSubview(mainMaskView)
+        
+        shareButton.setImage(UIImage.init(named: "preview_share_icon"), for: .normal)
+        shareButton.addTarget(self, action: Selector.sharePhoto, for: .touchUpInside)
+        
+        deleteButton.setImage(UIImage.init(named: "preview_delete_icon"), for: .normal)
+        deleteButton.addTarget(self, action: Selector.deletePhoto, for: .touchUpInside)
+        
+        backButton.setImage(UIImage.init(named: "preview_back_icon"), for: .normal)
+        backButton.addTarget(self, action: Selector.dismiss, for: .touchUpInside)
+        
+        mediaDateLabel.textColor = UIColor.white
+        mediaDateLabel.font = UIFont.systemFont(ofSize: 13)
+        addShadow(to: mediaDateLabel)
+        
+        mediaTimeLabel.textColor = UIColor.white
+        mediaTimeLabel.font = UIFont.systemFont(ofSize: 13)
+        addShadow(to: mediaTimeLabel)
 
+        mainMaskView.addSubview(shareButton)
+        mainMaskView.addSubview(deleteButton)
+        mainMaskView.addSubview(backButton)
+        mainMaskView.addSubview(mediaDateLabel)
+        mainMaskView.addSubview(mediaTimeLabel)
+        
+        // 双击手势
+        let doubleTap = UITapGestureRecognizer(target: self, action: Selector.doubleTapAction)
+        doubleTap.numberOfTapsRequired = 2
+        contentView.addGestureRecognizer(doubleTap)
+        // 拖动手势
+        let pan = UIPanGestureRecognizer(target: self, action: Selector.panAction)
+        pan.delegate = self
+        contentView.addGestureRecognizer(pan)
+    }
+    
+    func addShadow(to view: UIView) {
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 1
+        view.layer.shadowRadius = 6
+        view.layer.shadowOffset = CGSize(width: 0, height: 0)
+    }
+}
 
 
 

@@ -11,32 +11,142 @@ import Photos
 
 class VideoBrowserCell: PhotoBrowserCell {
     
-    var playerLayer: AVPlayerLayer?
-    var playerView: UIView?
-    
-    var mainMaskView: UIView?
-    var playButton: UIButton!
+    // MARK:- Properties
+    var playPauseButton: UIButton!
     var timeSlider: UISlider!
     var currentTimeLabel: UILabel!
     var totalTimeLabel: UILabel!
     var totalDuration: TimeInterval?
-    
+
     var delayItem: DispatchWorkItem?
-    var timer: Timer?
     
     var isDismissing = false
+    /// 观察 \AVPlayerItem.status
+    private var playerItemStatusObserver: NSKeyValueObservation?
     
-    var isPlayToEnd: Bool {
-        if playerLayer?.player?.currentItem != nil {
-            if playerLayer?.player?.rate == 0.0, playerLayer?.player?.currentItem?.duration == playerLayer?.player?.currentTime() { return true }
-        }
-        return false
+    /// 观察 \AVPlayerItem.duration
+    private var playerItemDurationObserver: NSKeyValueObservation?
+    
+    /// 观察 \AVPlayer.rate
+    private var playerRateObserver: NSKeyValueObservation?
+    
+    @objc lazy var player = AVPlayer()
+    var playerView: PlayerView!
+    var playerLayer: AVPlayerLayer? {
+        return playerView.playerLayer
     }
+    
+    var playerItem: AVPlayerItem? = nil {
+        willSet {
+            /// remove any previous KVO observer
+            guard let playerItemStatusObserver = playerItemStatusObserver else { return }
+            playerItemStatusObserver.invalidate()
+        }
+        
+        didSet {
+            /*
+             If needed, configure player item here before associating it with a player
+             (example: adding outputs, setting text style rules, selecting media options)
+             */
+            player.replaceCurrentItem(with: playerItem)
+            if playerItem == nil {
+                cleanUpPlayerPeriodicTimeObserver()
+            } else {
+                setupPlayerPeriodicTimeObserver()
+            }
+            
+            // Use KVO to get notified of changes in the AVPlayerItem duration property
+            playerItemDurationObserver = playerItem?.observe(\AVPlayerItem.duration, options: [.new, .initial]) { [weak self](item, _) in
+                guard let strongSelf = self else { return }
+                
+                // Update `timeSlider` and enable/disable controls when `duration` > 0.0
+                let newDuration = item.duration
+                let hasValidDuration = newDuration.isNumeric && newDuration.value != 0
+                let newDurationSeconds = hasValidDuration ? CMTimeGetSeconds(newDuration) : 0.0
+                
+                strongSelf.timeSlider.maximumValue = Float(newDurationSeconds)
+                
+                let currentTime = CMTimeGetSeconds(strongSelf.player.currentTime())
+                strongSelf.timeSlider.value = hasValidDuration ? Float(currentTime) : 0.0
+                
+                strongSelf.playPauseButton.isEnabled = hasValidDuration
+                strongSelf.timeSlider.isEnabled = hasValidDuration
+                
+                strongSelf.currentTimeLabel.text = strongSelf.createTimeString(time: Float(currentTime))
+                strongSelf.totalTimeLabel.text = strongSelf.createTimeString(time: Float(newDurationSeconds))
+            }
+            
+            playerItemStatusObserver = playerItem?.observe(\AVPlayerItem.status, options: [.new, .initial]) { [weak self] (item, _) in
+                guard let strongSelf = self else { return }
+                
+                // display an error if status becomes Failed
+                if item.status == .failed {
+                    strongSelf.handle(error: strongSelf.player.currentItem?.error as NSError?)
+                } else if item.status == .readyToPlay {
+                    
+                    if let asset = strongSelf.player.currentItem?.asset {
+                        /*
+                         First test whether the values of `assetKeysRequiredToPlay` we need
+                         have been successfully loaded.
+                         */
+                        for key in VideoBrowserCell.assetKeysRequiredToPlay {
+                            var  error: NSError?
+                            if asset.statusOfValue(forKey: key, error: &error) == .failed {
+                                strongSelf.handle(error: error)
+                                return
+                            }
+                        }
+                        
+                        if !asset.isPlayable || asset.hasProtectedContent {
+                            // we can't paly this asset
+                            strongSelf.handle(error: nil)
+                            return
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    static let assetKeysRequiredToPlay = [
+        "playable",
+        "hasProtectedContent"
+    ]
+    
+    var currentTime: Double {
+        get {
+            return CMTimeGetSeconds(player.currentTime())
+        }
+        
+        set {
+            let newValue = CMTimeMakeWithSeconds(newValue, 1)
+            player.seek(to: newValue, toleranceBefore: kCMTimeZero, toleranceAfter: kCMTimeZero)
+        }
+    }
+    
+    var duration: Double {
+        guard let currentItem = player.currentItem else { return 0.0 }
+        return CMTimeGetSeconds(currentItem.duration)
+    }
+    
+    var timeObserverToken: AnyObject?
+    /*
+     A formatter for individual date components used to provide an appropriate
+     value for the `startTimeLabel` and `durationLabel`.
+     */
+    let timeRemainingFormatter: DateComponentsFormatter = {
+        let formatter = DateComponentsFormatter()
+        formatter.zeroFormattingBehavior = .pad
+        formatter.allowedUnits = [.minute, .second]
+        
+        return formatter
+    }()
+    
     
     //MARK:- Life cycle
     override init(frame: CGRect) {
         super.init(frame: frame)
-        initUI()
+        addUI()
         scrollView.isHidden = true
     }
     
@@ -49,73 +159,60 @@ class VideoBrowserCell: PhotoBrowserCell {
         if asset.mediaType != .video { return }
         self.asset = asset
         imageView.image = placeholder
-        resetUI()
-        preparePlayer()
+
     }
     
-    func stopPlayer() {
-        timeSlider.setValue(0, animated: false)
-        playButton.isSelected = false
-        delayItem?.cancel()
-        if playerLayer?.player?.currentItem != nil {
-            pauseVideo()
-            if playerLayer?.player?.currentItem?.status == .readyToPlay {
-                playerLayer?.player!.seek(to: CMTimeMake(Int64(0), 1), toleranceBefore: kCMTimeZero, toleranceAfter: kCMTimeZero, completionHandler: { (finished) in
-                })
-                currentTimeLabel.text = Util.formatVideoTime(0)
+    func cellWillAppear() {
+        playerView.playerLayer.player = player
+        
+        let options = PHVideoRequestOptions()
+        options.isNetworkAccessAllowed = true
+        options.deliveryMode = .automatic
+        
+        PHImageManager.default().requestPlayerItem(forVideo: asset!, options: options, resultHandler: { playerItem, _ in
+            DispatchQueue.main.sync {
+                guard playerItem != nil else { return }
+                self.playerItem = playerItem
             }
-        }
+        })
+        timeSlider.translatesAutoresizingMaskIntoConstraints = true
+        timeSlider.autoresizingMask = .flexibleWidth
+    }
+    
+    func cellDidDisappear() {
+        player.pause()
+        cleanUpPlayerPeriodicTimeObserver()
     }
 
     //MARK:- Actions
-    @objc func dismiss() {
-        
-    }
-    
     @objc func playButtonClicked(button: UIButton) {
-        button.isSelected = !button.isSelected
-        if button.isSelected {
-            playVideo()
-            // maskView  立即消失
-            switchMaskView(hide: true)
-        }else {
-            pauseVideo()
-            autoFadeOutControlViewWithAnimation()
-        }
-        
-    }
-    /// Timer 事件
-    @objc func playerTimerAction() {
-        let currentTime = CMTimeGetSeconds(self.playerLayer!.player!.currentTime())
-        timeSlider.setValue(Float(currentTime / totalDuration!), animated: true)
-        currentTimeLabel.text = Util.formatVideoTime(TimeInterval(currentTime))
-        if isPlayToEnd {
-            videoDidEndPlay()
+        if player.rate != 1.0 {
+            // Not playing foward, so play
+            if currentTime == duration {
+                // At end, so got back to begining
+                currentTime = 0.0
+            }
+            player.play()
+        } else {
+            player.pause()
         }
     }
+
     /// 单击手势，显示或者隐藏 maskView
     @objc func singleTapAction(_ tap: UITapGestureRecognizer) {
         // 动画显示或者隐藏 maskView
         // 自动消失
-        mainMaskView?.alpha = mainMaskView?.alpha == 0 ? 1 : 0
+        mainMaskView.alpha = mainMaskView.alpha == 0 ? 1 : 0
         
     }
     /// 双击手势，在显示图片的时候是放大或者缩小，在显示视频的时候，是暂停或者播放
     @objc override func doubleTapAction(_ tap: UITapGestureRecognizer) {
-        self.playButtonClicked(button: playButton)
-    }
-
-    /// slider actions
-    @objc func sliderTouchBegan(_ sender: UISlider)  {
-        
+        self.playButtonClicked(button: playPauseButton)
     }
     
     @objc func sliderValueChanged(_ sender: UISlider)  {
         cancelAutoFadeOutAnimation()
-        let currentValue = TimeInterval(sender.value) * totalDuration!
-        currentTimeLabel.text = Util.formatVideoTime(currentValue)
-        playerLayer?.player!.seek(to: CMTimeMake(Int64(currentValue), 1), toleranceBefore: kCMTimeZero, toleranceAfter: kCMTimeZero, completionHandler: { (finished) in
-        })
+        currentTime = Double(sender.value)
     }
     
     @objc func sliderTouchEnded(_ sender: UISlider)  {
@@ -133,11 +230,11 @@ class VideoBrowserCell: PhotoBrowserCell {
         // 用于在拉动图片的时候，其他视图的变化，比如这里就是拉动的时候，删除，分享，返回等按钮的 alpha 就要变化
         if scale < 0.98 {
             UIView.animate(withDuration: 0.3, animations: {
-                self.mainMaskView?.alpha = 0.0
+                self.mainMaskView.alpha = 0.0
             }, completion: nil)
         } else if scale >= 1.0 {
             UIView.animate(withDuration: 0.3, animations: {
-                self.mainMaskView?.alpha = 1.0
+                self.mainMaskView.alpha = 1.0
             }, completion: nil)
         }
     }
@@ -148,62 +245,12 @@ class VideoBrowserCell: PhotoBrowserCell {
         if needResetSize { self.playerView?.bounds.size = size }
     }
 
-    
-    //MARK:- Private funcs
-    
-    private func playVideo() {
-        setupTimer()
-        if isPlayToEnd {
-            // relplay
-            playerLayer?.player?.seek(to: CMTimeMake(Int64(0), 1), toleranceBefore: kCMTimeZero, toleranceAfter: kCMTimeZero, completionHandler: {[weak self] (finished) in
-                self?.playerLayer?.player?.play()
-                self?.timeSlider.setValue(0, animated: true)
-                self?.setupTimer()
-            })
-        } else {
-            playerLayer?.player!.play()
-        }
-    }
-    
-    private func pauseVideo() {
-        if playerLayer?.player?.currentItem != nil {
-            playerLayer?.player!.pause()
-            timer?.fireDate = Date.distantFuture
-        }
-    }
-    
-    private func videoDidEndPlay() {
-        // 此时说明已经播放完毕，再次播放则重头开始播放
-        timer?.invalidate()
-        // 显示 mask 并取消自动消失
-        self.mainMaskView?.alpha = 1.0
-        self.playButton.isSelected = false
-        cancelAutoFadeOutAnimation()
-    }
-    
-    private func setupTimer() {
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: Selector.playerTimerAction, userInfo: nil, repeats: true)
-        // 不添加这句，那么当滑动 CollectionView 的时候，时间轴不会动
-        RunLoop.current.add(timer!, forMode: .commonModes)
-        timer?.fireDate = Date()
-    }
-    
-    private func resetUI() {
-        timeSlider.value = 0.0
-        playButton.isSelected = false
-        playButton.isHidden = false
-        mainMaskView?.alpha = 1.0
-        // 取消自动消失
-        cancelAutoFadeOutAnimation()
-    }
-    
     private func autoFadeOutControlViewWithAnimation() {
         cancelAutoFadeOutAnimation()
         delayItem = DispatchWorkItem { [weak self] in
-            if self?.isPlayToEnd == false{
-                self?.switchMaskView(hide: true)
-            }
+//            if self?.isPlayToEnd == false{
+//                self?.switchMaskView(hide: true)
+//            }
         }
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 2,
                                       execute: delayItem!)
@@ -216,12 +263,41 @@ class VideoBrowserCell: PhotoBrowserCell {
     private func switchMaskView(hide: Bool) {
         let alpha: CGFloat = hide ? 0 : 1
         UIView.animate(withDuration: 0.3, animations: {
-            self.mainMaskView?.alpha = CGFloat(alpha)
+            self.mainMaskView.alpha = CGFloat(alpha)
         }) { (_) in
             if hide {
                 self.autoFadeOutControlViewWithAnimation()
             }
         }
+    }
+    
+    private func cleanUpPlayerPeriodicTimeObserver() {
+        if let timeObserverToken = timeObserverToken {
+            player.removeTimeObserver(timeObserverToken)
+            self.timeObserverToken = nil
+        }
+    }
+    
+    private func setupPlayerPeriodicTimeObserver() {
+        guard timeObserverToken == nil else { return }
+        let time = CMTimeMake(1, 1)
+        // Use a weak self variable to avoid a retain cycle in the block
+        timeObserverToken = player.addPeriodicTimeObserver(forInterval: time, queue: DispatchQueue.main, using: { [weak self] time in
+            let timeElapsed = Float(CMTimeGetSeconds(time))
+            self?.timeSlider.setValue(timeElapsed, animated: false)
+            self?.currentTimeLabel.text = self?.createTimeString(time: timeElapsed)
+        }) as AnyObject?
+    }
+    
+    // MARK:- KVO
+    // Trigger KVO for anyone observing our properties affected by player and player.currentItem
+    override class func keyPathsForValuesAffectingValue(forKey key: String) -> Set<String> {
+        let affectedKeyPathsMappingByKey: [String: Set<String>] = [
+            "duration": [#keyPath(VideoBrowserCell.player.currentItem.duration)],
+            "rate": [#keyPath(VideoBrowserCell.player.rate)]
+        ]
+        
+        return affectedKeyPathsMappingByKey[key] ?? super.keyPathsForValuesAffectingValue(forKey: key)
     }
     
     private func preparePlayer() {
@@ -232,40 +308,20 @@ class VideoBrowserCell: PhotoBrowserCell {
         PHImageManager.default().requestPlayerItem(forVideo: asset, options: options, resultHandler: { playerItem, _ in
             DispatchQueue.main.sync {
                 guard playerItem != nil else { return }
-                
-                self.totalDuration = self.asset.duration
-                self.totalTimeLabel.text = Util.formatVideoTime(self.totalDuration!)
-                self.currentTimeLabel.text = Util.formatVideoTime(0)
-                // 生成 AVPlayer 和 AVPlayerLayer
-                let player: AVPlayer
-                player = AVPlayer(playerItem: playerItem)
-                let playerLayer = AVPlayerLayer(player: player)
-                playerLayer.videoGravity = AVLayerVideoGravity.resizeAspect
-                playerLayer.frame = self.contentView.layer.bounds
-                self.playerLayer?.removeFromSuperlayer()
-                self.playerView?.layer.addSublayer(playerLayer)
-                self.playerLayer = playerLayer
             }
         })
     }
     
     
-    private func initUI() {
-        playerView = UIView.init()
-        playerView?.clipsToBounds = true
-        contentView.addSubview(playerView!)
+    private func addUI() {
+        playerView = PlayerView(frame: fitFrame)
+        playerView.clipsToBounds = true
+        contentView.insertSubview(playerView, belowSubview: mainMaskView)
         
-        playerLayer = AVPlayerLayer.init()
-        playerView?.layer.addSublayer(playerLayer!)
-        
-        mainMaskView = UIView.init()
-        contentView.addSubview(mainMaskView!)
-        mainMaskView?.backgroundColor = .clear
-        
-        playButton = UIButton.init(type: .custom)
-        playButton.setImage(UIImage.init(named: "播放大"), for: .normal)
-        playButton.setImage(UIImage.init(named: "暂停大"), for: .selected)
-        playButton.addTarget(self, action: Selector.playButtonAction, for: .touchUpInside)
+        playPauseButton = UIButton.init(type: .custom)
+        playPauseButton.setImage(UIImage.init(named: "播放大"), for: .normal)
+        playPauseButton.setImage(UIImage.init(named: "暂停大"), for: .selected)
+        playPauseButton.addTarget(self, action: Selector.playButtonAction, for: .touchUpInside)
         
         timeSlider = UISlider.init()
         timeSlider.minimumTrackTintColor = UIColor.purple
@@ -273,7 +329,6 @@ class VideoBrowserCell: PhotoBrowserCell {
         timeSlider.value = 0.0
         timeSlider.maximumValue = 1.0
         timeSlider.minimumValue = 0.0
-        timeSlider.addTarget(self, action: Selector.sliderTouchBegan, for: UIControlEvents.touchDown)
         timeSlider.addTarget(self, action: Selector.sliderValueChanged, for: UIControlEvents.valueChanged)
         timeSlider.addTarget(self, action: Selector.sliderTouchEnded, for: [UIControlEvents.touchUpInside,UIControlEvents.touchCancel, UIControlEvents.touchUpOutside])
         
@@ -286,10 +341,10 @@ class VideoBrowserCell: PhotoBrowserCell {
         totalTimeLabel.font = UIFont.systemFont(ofSize: 13)
         totalTimeLabel.textAlignment = .right
         
-        mainMaskView?.addSubview(playButton)
-        mainMaskView?.addSubview(currentTimeLabel)
-        mainMaskView?.addSubview(totalTimeLabel)
-        mainMaskView?.addSubview(timeSlider)
+        mainMaskView.addSubview(playPauseButton)
+        mainMaskView.addSubview(currentTimeLabel)
+        mainMaskView.addSubview(totalTimeLabel)
+        mainMaskView.addSubview(timeSlider)
         
         // 单击 显示/隐藏 maskView
         let singleTap = UITapGestureRecognizer(target: self, action: Selector.singleTapAction)
@@ -308,15 +363,47 @@ class VideoBrowserCell: PhotoBrowserCell {
             imageView.frame = fitFrame
             playerView?.frame = fitFrame
         }
-        playerLayer?.frame = (playerView?.bounds)!
-        mainMaskView?.frame = contentView.bounds
+        mainMaskView.frame = contentView.bounds
         
-        playButton.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
-        playButton.center = contentView.center
+        var bottomPadding: CGFloat = 10
+        if #available(iOS 11.0, *),  UIScreen.main.bounds.height == 812 {
+            bottomPadding = self.safeAreaInsets.bottom + 50
+        }
         
-        currentTimeLabel.frame = CGRect(x: 10, y: contentView.bounds.maxY - 30, width: 50, height: 20)
-        totalTimeLabel.frame = CGRect(x: contentView.bounds.maxX - 60, y: currentTimeLabel.frame.origin.y, width: 50, height: 20)
-        timeSlider.frame = CGRect(x: currentTimeLabel.frame.maxX + 3, y: contentView.bounds.maxY - 30, width: contentView.bounds.size.width - 126, height: 20)
+        playPauseButton.snp.updateConstraints { (make) in
+            make.centerX.centerY.equalTo(contentView)
+            make.width.height.equalTo(50)
+        }
+        
+        currentTimeLabel.snp.updateConstraints { (make) in
+            make.left.equalTo(contentView.snp.left).offset(10)
+            make.bottom.equalTo(contentView.snp.bottom).offset(-bottomPadding)
+        }
+        
+        totalTimeLabel.snp.updateConstraints { (make) in
+            make.right.equalTo(contentView.snp.right).offset(-10)
+            make.centerY.equalTo(currentTimeLabel)
+        }
+        
+        timeSlider.snp.updateConstraints { (make) in
+            make.left.equalTo(currentTimeLabel.snp.right).offset(3)
+            make.right.equalTo(totalTimeLabel.snp.left).offset(-3)
+            make.centerY.equalTo(currentTimeLabel).offset(0)
+        }
+    }
+}
+
+extension VideoBrowserCell {
+    func handle(error: NSError?) {
+        print("👻Error: \(String(describing: error?.localizedDescription))")
+    }
+    
+    // MARK: Convenience
+    func createTimeString(time: Float) -> String {
+        let components = NSDateComponents()
+        components.second = Int(max(0.0, time))
+        
+        return timeRemainingFormatter.string(from: components as DateComponents)!
     }
 }
 
@@ -324,22 +411,14 @@ class VideoBrowserCell: PhotoBrowserCell {
 
 
 
+
 fileprivate extension Selector {
-//    static let sharePhoto = #selector(VideoBrowserViewCell.sharePhoto)
-//    static let deletePhoto = #selector(VideoBrowserViewCell.deletePhoto(_:))
-    static let dismiss = #selector(VideoBrowserCell.dismiss)
-    
+
     static let playButtonAction = #selector(VideoBrowserCell.playButtonClicked)
     static let singleTapAction = #selector(VideoBrowserCell.singleTapAction(_:))
     static let doubleTapAction = #selector(VideoBrowserCell.doubleTapAction(_:))
-    
-    static let sliderTouchBegan = #selector(VideoBrowserCell.sliderTouchBegan(_:))
     static let sliderValueChanged = #selector(VideoBrowserCell.sliderValueChanged(_:))
     static let sliderTouchEnded = #selector(VideoBrowserCell.sliderTouchEnded(_:))
-    
-    static let playerTimerAction = #selector(VideoBrowserCell.playerTimerAction)
-    
-    
 }
 
 

@@ -43,11 +43,10 @@ class MediaBrowserCollectionViewDataSource: NSObject, UICollectionViewDataSource
         }
         
         if asset?.mediaType == .video {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: video1CellResueId, for: indexPath) as! VideoBrowser1Cell
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: videoCellResueId, for: indexPath) as! VideoBrowserCell
             let image = owner?.mediaBrowserDelegate?.mediaBrowser(owner, thumbnailImageForIndexPath: indexPath)
-//            cell.refreshCell(asset: asset, placeholder: image)
-//            cell.photoBrowserCellDelegate = owner
             cell.refreshCell(asset: asset, placeholder: image)
+            cell.photoBrowserCellDelegate = owner
             return cell
         }
         return UICollectionViewCell.init()

@@ -27,8 +27,6 @@
 		628D0C4120635FE7008AB20F /* LQMdeiaBrowserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 628D0C4020635FE7008AB20F /* LQMdeiaBrowserManager.swift */; };
 		62B8D1DE208DCB4900D37887 /* PlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B8D1DD208DCB4900D37887 /* PlayerView.swift */; };
 		62B8D1E4208DD36700D37887 /* PlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62B8D1E3208DD36700D37887 /* PlayerViewController.swift */; };
-		62D7E29B2091C1A600A0E011 /* VideoBrowser1Cell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62D7E2992091C1A600A0E011 /* VideoBrowser1Cell.swift */; };
-		62D7E29C2091C1A600A0E011 /* VideoBrowser1Cell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 62D7E29A2091C1A600A0E011 /* VideoBrowser1Cell.xib */; };
 		62F204AC206DEAFE00B7E9FF /* TabBarViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62F204AB206DEAFE00B7E9FF /* TabBarViewController.swift */; };
 		62F204B3206DF94F00B7E9FF /* Album.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62F204AF206DF94F00B7E9FF /* Album.storyboard */; };
 		62F204B4206DF94F00B7E9FF /* Other.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 62F204B1206DF94F00B7E9FF /* Other.storyboard */; };
@@ -86,8 +84,6 @@
 		628D0C4020635FE7008AB20F /* LQMdeiaBrowserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LQMdeiaBrowserManager.swift; sourceTree = "<group>"; };
 		62B8D1DD208DCB4900D37887 /* PlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerView.swift; sourceTree = "<group>"; };
 		62B8D1E3208DD36700D37887 /* PlayerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerViewController.swift; sourceTree = "<group>"; };
-		62D7E2992091C1A600A0E011 /* VideoBrowser1Cell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoBrowser1Cell.swift; sourceTree = "<group>"; };
-		62D7E29A2091C1A600A0E011 /* VideoBrowser1Cell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = VideoBrowser1Cell.xib; sourceTree = "<group>"; };
 		62F204AB206DEAFE00B7E9FF /* TabBarViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabBarViewController.swift; sourceTree = "<group>"; };
 		62F204B0206DF94F00B7E9FF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Album.storyboard; sourceTree = "<group>"; };
 		62F204B2206DF94F00B7E9FF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Other.storyboard; sourceTree = "<group>"; };
@@ -191,8 +187,6 @@
 				6242BCC22068FCEF00DC53C4 /* BrowserCollectionView.swift */,
 				6242BCC82069F59900DC53C4 /* PhotoBrowserCell.swift */,
 				6242BCCA2069F5CE00DC53C4 /* VideoBrowserCell.swift */,
-				62D7E2992091C1A600A0E011 /* VideoBrowser1Cell.swift */,
-				62D7E29A2091C1A600A0E011 /* VideoBrowser1Cell.xib */,
 				62B8D1E3208DD36700D37887 /* PlayerViewController.swift */,
 				62B8D1DD208DCB4900D37887 /* PlayerView.swift */,
 				6242BCB72068F48200DC53C4 /* ScaleAnimator.swift */,
@@ -395,7 +389,6 @@
 				62F204B4206DF94F00B7E9FF /* Other.storyboard in Resources */,
 				62F7C1B2205114FA009E3F4E /* LaunchScreen.storyboard in Resources */,
 				62F7C1AF205114FA009E3F4E /* Assets.xcassets in Resources */,
-				62D7E29C2091C1A600A0E011 /* VideoBrowser1Cell.xib in Resources */,
 				62F7C1AD205114FA009E3F4E /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -602,7 +595,6 @@
 				62F7C1D6205120F3009E3F4E /* PhotoCollectionViewCell.swift in Sources */,
 				6242BCC52068FD9600DC53C4 /* MediaBrowserCollectionViewDataSource.swift in Sources */,
 				628D0C3F2063505C008AB20F /* AssetGridViewController.swift in Sources */,
-				62D7E29B2091C1A600A0E011 /* VideoBrowser1Cell.swift in Sources */,
 				6242BCB62068DAA400DC53C4 /* MediaBrowserViewController.swift in Sources */,
 				6242BCCF206B770600DC53C4 /* Utils.swift in Sources */,
 				6242BCC72069D90900DC53C4 /* AssetModel.swift in Sources */,
