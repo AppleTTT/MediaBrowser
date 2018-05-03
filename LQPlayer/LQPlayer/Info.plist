@@ -25,7 +25,7 @@
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>是否允许我们添加照片到您的系统相册？</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>是否允许我们获取您的相册以同步 Tonot 智能眼镜的媒体内容？</string>
+	<string>是否允许我们获取您的相册</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>

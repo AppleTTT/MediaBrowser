@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import Photos
 
 
 struct LQMdiaBrowserManager {
@@ -22,6 +23,28 @@ struct LQMdiaBrowserManager {
     var itemHeight:CGFloat = 0
     
     var sectionInsets = UIEdgeInsets(top: 5.0, left: 15.0, bottom: 5.0, right: 15.0)
+    
+    
+    static let allPhotos: PHFetchResult<PHAsset> = {
+        let allPhotoOption = PHFetchOptions()
+        allPhotoOption.sortDescriptors = [NSSortDescriptor(key: "creationDate",  ascending: true)]
+        let assets = PHAsset.fetchAssets(with: allPhotoOption)
+        return assets
+    }()
+    static let smartAlbums: PHFetchResult<PHAssetCollection> = {
+        return PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .albumRegular, options: nil)
+    }()
+    static let userCollections: PHFetchResult<PHCollection> = {
+        return PHCollectionList.fetchTopLevelUserCollections(with: nil)
+    }()
+    
+
+    
+    
+    
+    
+    
+    
     
 }
 

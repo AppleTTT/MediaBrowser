@@ -95,7 +95,6 @@ class AlbumCollectionViewController: UIViewController {
 extension AlbumCollectionViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        //TODO: jump to asset grid viewController
         let assetGirdVC = AssetGridViewController()
         
         switch Section(rawValue: indexPath.section)! {
@@ -104,12 +103,12 @@ extension AlbumCollectionViewController: UITableViewDelegate {
         case .smartAlbums:
             let collection = smartAlbums.object(at: indexPath.row)
             assetGirdVC.fetchResult = PHAsset.fetchAssets(in: collection, options: nil)
-            assetGirdVC.assetCollection = collection
+//            assetGirdVC.assetCollection = collection
             
         case .userCollections:
             guard let collection = userCollections.object(at: indexPath.row) as? PHAssetCollection else { fatalError("expected asset collection") }
             assetGirdVC.fetchResult = PHAsset.fetchAssets(in: collection, options: nil)
-            assetGirdVC.assetCollection = collection
+//            assetGirdVC.assetCollection = collection
         }
         self.navigationController?.pushViewController(assetGirdVC, animated: true)
     }

@@ -1,0 +1,32 @@
+# Uncomment the next line to define a global platform for your project
+platform :ios, '9.0'
+
+# Allows per-dev overrides
+# local_podfile = "Podfile.local"
+# eval(File.open(local_podfile).read) if File.exist? local_podfile
+
+target 'LQPlayer' do
+  # Comment the next line if you're not using Swift and don't want to use dynamic frameworks
+  use_frameworks!
+
+  # Pods for LQPlayer
+  pod 'SnapKit'
+  pod 'Permission/Photos'
+  pod 'SwiftDate'
+  pod 'XLPagerTabStrip'
+  pod 'FSPagerView'
+  pod 'SwiftyTimer'
+  pod 'MBProgressHUD'
+  pod 'Reveal-SDK', :git => 'https://git.coding.net/kakukeme/Reveal-SDK.git', :configurations => ['Debug']
+  
+  target 'LQPlayerTests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+  target 'LQPlayerUITests' do
+    inherit! :search_paths
+    # Pods for testing
+  end
+
+end
