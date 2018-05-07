@@ -10,7 +10,7 @@ import UIKit
 import Photos
 
 
-class AssetModel {
+class AlbumItem {
     
     var asset: PHAsset?
     var isSelected: Bool = false

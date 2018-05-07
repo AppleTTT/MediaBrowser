@@ -51,7 +51,7 @@ class MediaBrowserViewController: UIViewController {
     var dataSource = MediaBrowserCollectionViewDataSource.init(data: [:], keysSequence: [], owner: nil)
     
     /// 数据源,和取数据的数组一定不为空，为空则说明有问题
-    var dataDictionary: [String: Array<AssetModel>]!
+    var dataDictionary: [String: Array<AlbumItem>]!
     var keysSequence:  [String]!
     /// 上一个 cell，用于将滑出屏幕的视频 reset
     var lastCell: UICollectionViewCell?
@@ -73,7 +73,7 @@ class MediaBrowserViewController: UIViewController {
     
     //MARK:- Life cycle
     /// 初始化，传入用于present出本VC的VC，以及实现了PhotoBrowserDelegate协议的对象
-    public init(showByViewController presentingVC: UIViewController, delegate: MediaBrowserViewControllerDelegate, data: [String: Array<AssetModel>]!, keysSequence: [String]!) {
+    public init(showByViewController presentingVC: UIViewController, delegate: MediaBrowserViewControllerDelegate, data: [String: Array<AlbumItem>]!, keysSequence: [String]!) {
         self.presentingVC = presentingVC
         self.mediaBrowserDelegate = delegate
         self.dataDictionary = data
@@ -152,36 +152,41 @@ class MediaBrowserViewController: UIViewController {
 
 extension MediaBrowserViewController: UICollectionViewDelegate {
     
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        if cell is VideoBrowserCell {
-            let videoCell = cell as! VideoBrowserCell
-            videoCell.cellWillAppear()
-        }
-    }
-    
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        // 已经消失的 cell
+        if lastCell is VideoBrowserCell {
+            let videoBrowserCell = lastCell as! VideoBrowserCell
+            videoBrowserCell.cellDidDisappear()
+        }
+        
         lastCell = cell
     }
     
     //MARK:- UIScrollViewDelegate
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        if collectionView.visibleCells.count == 1 {
+            let cell = collectionView.visibleCells.first
+            let scrollIndexPath = collectionView.indexPath(for: cell!)!
+            mediaBrowserDelegate?.mediaBrowser(self, didScrollAt: scrollIndexPath)
+        }
+    }
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         if collectionView.visibleCells.count == 1 {
             let cell = collectionView.visibleCells.first
             currentIndexPath = collectionView.indexPath(for: cell!)!
-            mediaBrowserDelegate?.mediaBrowser(self, didScrollAt: currentIndexPath)
-        }
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard lastCell != nil else { return }
-        if lastCell is VideoBrowserCell, !collectionView.visibleCells.contains(lastCell!) {
-            let videoBrowserCell = lastCell as! VideoBrowserCell
-            videoBrowserCell.cellDidDisappear()
         }
     }
 }
 
 extension MediaBrowserViewController: PhotoBrowserCellDelegate {
+    func shareMedia(_ cell: PhotoBrowserCell) {
+        
+    }
+    
+    func deleteMedia(_ cell: PhotoBrowserCell, _ deleteButton: UIButton) {
+        
+    }
+    
     func photoBrowserDismiss(_ cell: PhotoBrowserCell) {
         coverStatusBar(false)
         dismiss(animated: true, completion: nil)

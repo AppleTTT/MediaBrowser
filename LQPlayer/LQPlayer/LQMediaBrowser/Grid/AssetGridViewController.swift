@@ -16,7 +16,7 @@ class AssetGridViewController: UIViewController {
     var collectionView: UICollectionView!
     /// 所有图片
     var fetchResult: PHFetchResult<PHAsset>!
-    var sectionDic = [String: Array<AssetModel>]()
+    var sectionDic = [String: Array<AlbumItem>]()
     var allKeys = [String]()
     var data = Array<PHAsset>()
     
@@ -74,11 +74,11 @@ class AssetGridViewController: UIViewController {
             let dateString = asset.creationDate?.dateToString()
             if self.sectionDic.keys.contains(dateString!) {
                 var array = self.sectionDic[dateString!]
-                let model = AssetModel.init(asset: asset)
+                let model = AlbumItem.init(asset: asset)
                 array?.append(model)
                 self.sectionDic[dateString!] = array
             } else {
-                let model = AssetModel.init(asset: asset)
+                let model = AlbumItem.init(asset: asset)
                 let array = [model]
                 self.sectionDic[dateString!] = array
             }

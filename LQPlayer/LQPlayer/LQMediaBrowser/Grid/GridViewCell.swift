@@ -79,7 +79,7 @@ class GridViewCell: UICollectionViewCell {
     }
     
     //MARK:- APIs
-    func refreshCell(with model: AssetModel?) {
+    func refreshCell(with model: AlbumItem?) {
         guard let model = model else { return }
         if model.asset != nil, model.asset!.duration > 0 {
             durationLable.text = Util.formatVideoTime(model.asset!.duration)

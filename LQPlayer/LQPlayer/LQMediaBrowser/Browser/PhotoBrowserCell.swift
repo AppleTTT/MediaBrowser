@@ -8,6 +8,7 @@
 
 import UIKit
 import Photos
+import SwiftDate
 
 @objc protocol PhotoBrowserCellDelegate: NSObjectProtocol {
     /// 拖动时回调。scale:缩放比率
@@ -15,14 +16,13 @@ import Photos
     /// dismiss 操作
     func photoBrowserDismiss(_ cell: PhotoBrowserCell)
     /// 自定义 分享操作
-    @objc optional func shareMedia(_ cell: PhotoBrowserCell)
+    func shareMedia(_ cell: PhotoBrowserCell)
     /// 自定义 删除操作
-    @objc optional func deleteMedia(_ cell: PhotoBrowserCell)
+    func deleteMedia(_ cell: PhotoBrowserCell, _ deleteButton: UIButton)
 }
 
 class PhotoBrowserCell: UICollectionViewCell {
     
-    weak var photoBrowserCellDelegate: PhotoBrowserCellDelegate?
     let imageView = UIImageView()
     let mainMaskView = UIView(frame: CGRect.zero)
     let backButton = UIButton(type: .custom)
@@ -70,6 +70,8 @@ class PhotoBrowserCell: UICollectionViewCell {
     var shouldLayout = true
     var asset: PHAsset!
     
+    weak var delegate: PhotoBrowserCellDelegate?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         initUI()
@@ -81,10 +83,12 @@ class PhotoBrowserCell: UICollectionViewCell {
     
     //MARK:- APIs
     func refreshCell(asset: PHAsset?, placeholder: UIImage?) {
-         guard let asset = asset else { return }
-//        imageView.contentMode = UIViewContentMode.scaleAspectFill
+        guard let asset = asset else { return }
         imageView.image = placeholder
         self.asset = asset
+        mediaDateLabel.text = asset.creationDate?.string(custom: "yyyy年MM月dd日")
+        mediaTimeLabel.text = asset.creationDate?.string(custom: "HH:mm")
+        
         let options = PHImageRequestOptions()
         options.deliveryMode = .highQualityFormat
         PHImageManager.default().requestImage(for: asset, targetSize: CGSize.init(width: asset.pixelWidth, height: asset.pixelHeight), contentMode: .aspectFit, options: options) { (image, info) in
@@ -95,8 +99,29 @@ class PhotoBrowserCell: UICollectionViewCell {
         }
         self.doLayout()
     }
-
+    
     //MARK:- Actions
+    
+    @objc func sharePhoto() {
+        guard self.asset != nil else {
+            showMediaIsImportingToast()
+            return
+        }
+        delegate?.shareMedia(self)
+    }
+    
+    @objc func deletePhoto(_ deleteButton: UIButton) {
+        guard self.asset != nil else {
+            showMediaIsImportingToast()
+            return
+        }
+        delegate?.deleteMedia(self, deleteButton)
+    }
+    
+    @objc func dismiss() {
+        delegate?.photoBrowserDismiss(self)
+    }
+    
     /// 响应双击
     @objc func doubleTapAction(_ dbTap: UITapGestureRecognizer) {
         // 如果当前没有任何缩放，则放大到目标比例
@@ -145,31 +170,45 @@ class PhotoBrowserCell: UICollectionViewCell {
             let r = results
             imageView.frame = r.0
             // 通知代理，发生了缩放。代理可依scale值改变背景蒙板alpha值
-            photoBrowserCellDelegate?.photoBrowserCell(self, didPanScale: r.1)
+            delegate?.photoBrowserCell(self, didPanScale: r.1)
             resizeCustomView(scale: r.1, rect: r.0)
         case .ended, .cancelled:
             if pan.velocity(in: self).y > 0 {
                 // dismiss
                 shouldLayout = false
                 imageView.frame = results.0
-                photoBrowserCellDelegate?.photoBrowserDismiss(self)
+                delegate?.photoBrowserDismiss(self)
                 resizeCustomView(scale: 0.0, rect: results.0)
             } else {
                 endPan()
                 resizeCustomView(scale: 1.0, rect: CGRect.zero)
             }
         default: endPan()
-            resizeCustomView(scale: 1.0, rect: CGRect.zero)
+        resizeCustomView(scale: 1.0, rect: CGRect.zero)
         }
     }
     
     //MARK:- Funs for override 交由子类重写，主要是方便 VideoCell
-    func resizeCustomView(scale: CGFloat, rect: CGRect) { }
+    func resizeCustomView(scale: CGFloat, rect: CGRect) {
+        // 用于在拉动图片的时候，其他视图的变化，比如这里就是拉动的时候，删除，分享，返回等按钮的 alpha 就要变化
+        if scale < 0.98 {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.mainMaskView.alpha = 0.0
+            }, completion: nil)
+        } else if scale >= 1.0 {
+            UIView.animate(withDuration: 0.3, animations: {
+                self.mainMaskView.alpha = 1.0
+            }, completion: nil)
+        }
+    }
     func customViewEndPan(needResetSize: Bool, size: CGSize) { }
+    func showMediaIsImportingToast() {
+        print("媒体导入中，无法操作")
+    }
     
     //MARK:- Private funcs
     private func endPan() {
-        photoBrowserCellDelegate?.photoBrowserCell(self, didPanScale: 1.0)
+        delegate?.photoBrowserCell(self, didPanScale: 1.0)
         // 如果图片当前显示的size小于原size，则重置为原size
         let size = fitSize
         let needResetSize = imageView.bounds.size.width < size.width
@@ -182,21 +221,6 @@ class PhotoBrowserCell: UICollectionViewCell {
             }
         }
     }
-    
-    @objc func sharePhoto() {
-        guard self.asset != nil else { return }
-//        delegate?.videoBrowserCellSharePhoto(self)
-    }
-    
-    @objc func deletePhoto(_ deleteButton: UIButton) {
-        guard self.asset != nil else { return }
-//        delegate?.videoBrowserCellDeletePhoto(self,deleteButton)
-    }
-    
-    @objc func dismiss() {
-//        delegate?.videoBrowserCellDismiss(self)
-    }
-    
     
     private func doLayout() {
         guard shouldLayout else { return }
@@ -240,11 +264,7 @@ class PhotoBrowserCell: UICollectionViewCell {
             make.right.equalTo(contentView.snp.right).offset(-8)
             make.top.equalTo(mediaDateLabel.snp.bottom).offset(5)
         }
-        
-        
     }
-    
-    
     
     //MARK:- Layout
     override func layoutSubviews() {
@@ -321,7 +341,7 @@ extension PhotoBrowserCell {
         mediaTimeLabel.textColor = UIColor.white
         mediaTimeLabel.font = UIFont.systemFont(ofSize: 13)
         addShadow(to: mediaTimeLabel)
-
+        
         mainMaskView.addSubview(shareButton)
         mainMaskView.addSubview(deleteButton)
         mainMaskView.addSubview(backButton)
