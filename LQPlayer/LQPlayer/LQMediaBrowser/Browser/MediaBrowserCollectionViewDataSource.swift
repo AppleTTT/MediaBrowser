@@ -11,12 +11,11 @@ import Photos
 
 class MediaBrowserCollectionViewDataSource: NSObject, UICollectionViewDataSource {
     
-    
-    var dataDictionary: [String: Array<AssetModel>]!
+    var dataDictionary: [String: Array<AlbumItem>]!
     var keysSequence:  [String]!
     weak var owner: MediaBrowserViewController?
     
-    init(data: [String: Array<AssetModel>], keysSequence: [String], owner: MediaBrowserViewController?) {
+    init(data: [String: Array<AlbumItem>], keysSequence: [String], owner: MediaBrowserViewController?) {
         self.dataDictionary = data
         self.keysSequence = keysSequence
         self.owner = owner
@@ -38,7 +37,7 @@ class MediaBrowserCollectionViewDataSource: NSObject, UICollectionViewDataSource
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: photoCellReuseId, for: indexPath) as! PhotoBrowserCell
             let image = owner?.mediaBrowserDelegate?.mediaBrowser(owner, thumbnailImageForIndexPath: indexPath)
             cell.refreshCell(asset: asset, placeholder: image)
-            cell.photoBrowserCellDelegate = owner
+            cell.delegate = owner
             return cell
         }
         
@@ -46,7 +45,7 @@ class MediaBrowserCollectionViewDataSource: NSObject, UICollectionViewDataSource
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: videoCellResueId, for: indexPath) as! VideoBrowserCell
             let image = owner?.mediaBrowserDelegate?.mediaBrowser(owner, thumbnailImageForIndexPath: indexPath)
             cell.refreshCell(asset: asset, placeholder: image)
-            cell.photoBrowserCellDelegate = owner
+            cell.delegate = owner
             return cell
         }
         return UICollectionViewCell.init()
@@ -55,10 +54,10 @@ class MediaBrowserCollectionViewDataSource: NSObject, UICollectionViewDataSource
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         let reuseableView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionElementKindSectionHeader, withReuseIdentifier: headerResueId, for: indexPath)
-
+        
         reuseableView.backgroundColor = UIColor.black
         return reuseableView
-    } 
+    }
 }
 
 
