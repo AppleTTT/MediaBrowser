@@ -153,11 +153,16 @@ class MediaBrowserViewController: UIViewController {
 extension MediaBrowserViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didEndDisplaying cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        // 已经消失的 cell
+        if lastCell is VideoBrowserCell {
+            let videoBrowserCell = lastCell as! VideoBrowserCell
+            videoBrowserCell.cellDidDisappear()
+        }
+        
         lastCell = cell
     }
     
     //MARK:- UIScrollViewDelegate
-    
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         if collectionView.visibleCells.count == 1 {
             let cell = collectionView.visibleCells.first
@@ -169,14 +174,6 @@ extension MediaBrowserViewController: UICollectionViewDelegate {
         if collectionView.visibleCells.count == 1 {
             let cell = collectionView.visibleCells.first
             currentIndexPath = collectionView.indexPath(for: cell!)!
-        }
-    }
-    
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard lastCell != nil else { return }
-        if lastCell is VideoBrowserCell, !collectionView.visibleCells.contains(lastCell!) {
-            let videoBrowserCell = lastCell as! VideoBrowserCell
-            videoBrowserCell.cellDidDisappear()
         }
     }
 }

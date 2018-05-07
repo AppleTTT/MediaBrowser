@@ -47,7 +47,6 @@ class VideoBrowserCell: PhotoBrowserCell {
             if playerItem == nil {
                 cleanUpPlayerPeriodicTimeObserver()
             } else {
-                self.playerView.playerLayer.player = self.player
                 setupPlayerPeriodicTimeObserver()
             }
             
@@ -167,7 +166,7 @@ class VideoBrowserCell: PhotoBrowserCell {
     
     func cellDidDisappear() {
         player.pause()
-        cleanUpPlayerPeriodicTimeObserver()
+        currentTime = 0.0
     }
     
     //MARK:- Actions
@@ -273,9 +272,10 @@ class VideoBrowserCell: PhotoBrowserCell {
     }
     
     private func setupPlayerPeriodicTimeObserver() {
-        guard timeObserverToken == nil else { return }
-        let interval = CMTimeMake(1, 1)
         
+        cleanUpPlayerPeriodicTimeObserver()
+        
+        let interval = CMTimeMake(1, 1)
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main, using: { [weak self] time in
             let timeElapsed = Float(CMTimeGetSeconds(time))
             self?.timeSlider.value = timeElapsed
@@ -311,6 +311,7 @@ class VideoBrowserCell: PhotoBrowserCell {
         
         playerView = PlayerView(frame: contentView.bounds)
         playerView.clipsToBounds = true
+        playerView.playerLayer.player = player
         contentView.insertSubview(playerView, belowSubview: mainMaskView)
         
         playPauseButton = UIButton.init(type: .custom)
