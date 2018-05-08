@@ -2,8 +2,8 @@
 //  PhotoBrowserCell.swift
 //  LQPlayer
 //
-//  Created by Lee on 2018/3/27.
-//  Copyright © 2018年 ATM. All rights reserved.
+//  Created by 李树 on 2018/3/27.
+//  Copyright © 2018年 laiqu. All rights reserved.
 //
 
 import UIKit
@@ -122,7 +122,10 @@ class PhotoBrowserCell: UICollectionViewCell {
         delegate?.photoBrowserDismiss(self)
     }
     
-    /// 响应双击
+    /// 单击操作
+    @objc func singleTapAction(_ tap: UITapGestureRecognizer) { }
+    
+    /// 双击操作
     @objc func doubleTapAction(_ dbTap: UITapGestureRecognizer) {
         // 如果当前没有任何缩放，则放大到目标比例
         // 否则重置到原比例
@@ -139,7 +142,7 @@ class PhotoBrowserCell: UICollectionViewCell {
         }
     }
     
-    /// 响应拖动
+    /// 响应操作
     @objc func panAction(_ pan: UIPanGestureRecognizer) {
         guard imageView.image != nil else { return }
         var results: (CGRect, CGFloat) {
@@ -177,14 +180,15 @@ class PhotoBrowserCell: UICollectionViewCell {
                 // dismiss
                 shouldLayout = false
                 imageView.frame = results.0
-                delegate?.photoBrowserDismiss(self)
                 resizeCustomView(scale: 0.0, rect: results.0)
+                dismiss()
             } else {
                 endPan()
                 resizeCustomView(scale: 1.0, rect: CGRect.zero)
             }
-        default: endPan()
-        resizeCustomView(scale: 1.0, rect: CGRect.zero)
+        default:
+            endPan()
+            resizeCustomView(scale: 1.0, rect: CGRect.zero)
         }
     }
     
@@ -203,7 +207,7 @@ class PhotoBrowserCell: UICollectionViewCell {
     }
     func customViewEndPan(needResetSize: Bool, size: CGSize) { }
     func showMediaIsImportingToast() {
-        print("媒体导入中，无法操作")
+        // TODO:
     }
     
     //MARK:- Private funcs
@@ -225,8 +229,8 @@ class PhotoBrowserCell: UICollectionViewCell {
     private func doLayout() {
         guard shouldLayout else { return }
         scrollView.frame = contentView.bounds
-        scrollView.setZoomScale(1.0, animated: false)
         imageView.frame = fitFrame
+        scrollView.setZoomScale(1.0, animated: false)
         
         var topPadding: CGFloat = 20
         var bottomPadding1: CGFloat = 50
@@ -271,14 +275,24 @@ class PhotoBrowserCell: UICollectionViewCell {
         super.layoutSubviews()
         doLayout()
     }
+    
+    // 不加这个方法的话， scrollView 的捏合手势事件就会被 mainMaskView 接收，从而导致不能放大缩小图片
+    override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
+        let view = super.hitTest(point, with: event)
+        if view == mainMaskView {
+            return scrollView
+        }
+        return view
+    }
+    
 }
 
 extension PhotoBrowserCell: UIScrollViewDelegate {
-    public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+    
+    func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
     }
-    
-    public func scrollViewDidZoom(_ scrollView: UIScrollView) {
+    func scrollViewDidZoom(_ scrollView: UIScrollView) {
         imageView.center = centerOfContentSize
     }
 }
@@ -298,26 +312,19 @@ extension PhotoBrowserCell: UIGestureRecognizerDelegate {
     }
 }
 
-fileprivate extension Selector {
-    static let doubleTapAction = #selector(PhotoBrowserCell.doubleTapAction(_:))
-    static let panAction = #selector(PhotoBrowserCell.panAction(_:))
-    
-    static let sharePhoto = #selector(PhotoBrowserCell.sharePhoto)
-    static let deletePhoto = #selector(PhotoBrowserCell.deletePhoto(_:))
-    static let dismiss = #selector(PhotoBrowserCell.dismiss)
-}
-
 extension PhotoBrowserCell {
     // MARK:- UI
     func initUI() {
         contentView.addSubview(scrollView)
         scrollView.delegate = self
         scrollView.maximumZoomScale = imageMaximumZoomScale
+        scrollView.isMultipleTouchEnabled = true
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
         if #available(iOS 11.0, *) {
             scrollView.contentInsetAdjustmentBehavior = .never
         }
+        
         scrollView.addSubview(imageView)
         imageView.clipsToBounds = true
         
@@ -352,6 +359,12 @@ extension PhotoBrowserCell {
         let doubleTap = UITapGestureRecognizer(target: self, action: Selector.doubleTapAction)
         doubleTap.numberOfTapsRequired = 2
         contentView.addGestureRecognizer(doubleTap)
+        
+        // 单击手势
+        let singleTap = UITapGestureRecognizer(target: self, action: Selector.singleTapAction)
+        contentView.addGestureRecognizer(singleTap)
+        singleTap.require(toFail: doubleTap)
+        
         // 拖动手势
         let pan = UIPanGestureRecognizer(target: self, action: Selector.panAction)
         pan.delegate = self
@@ -366,7 +379,15 @@ extension PhotoBrowserCell {
     }
 }
 
-
+fileprivate extension Selector {
+    static let singleTapAction = #selector(PhotoBrowserCell.singleTapAction(_:))
+    static let doubleTapAction = #selector(PhotoBrowserCell.doubleTapAction(_:))
+    static let panAction = #selector(PhotoBrowserCell.panAction(_:))
+    
+    static let sharePhoto = #selector(PhotoBrowserCell.sharePhoto)
+    static let deletePhoto = #selector(PhotoBrowserCell.deletePhoto(_:))
+    static let dismiss = #selector(PhotoBrowserCell.dismiss)
+}
 
 
 

@@ -176,6 +176,14 @@ extension MediaBrowserViewController: UICollectionViewDelegate {
             currentIndexPath = collectionView.indexPath(for: cell!)!
         }
     }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard lastCell != nil else { return }
+        if lastCell is VideoBrowserCell, !collectionView.visibleCells.contains(lastCell!) {
+            let videoBrowserCell = lastCell as! VideoBrowserCell
+            videoBrowserCell.cellDidDisappear()
+        }
+    }
 }
 
 extension MediaBrowserViewController: PhotoBrowserCellDelegate {
