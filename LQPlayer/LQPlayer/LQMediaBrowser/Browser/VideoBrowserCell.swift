@@ -167,6 +167,7 @@ class VideoBrowserCell: PhotoBrowserCell {
     func cellDidDisappear() {
         player.pause()
         currentTime = 0.0
+        mainMaskView.alpha = 1.0
     }
     
     //MARK:- Actions
@@ -188,12 +189,12 @@ class VideoBrowserCell: PhotoBrowserCell {
     }
     
     /// 单击手势，显示或者隐藏 maskView
-    @objc func singleTapAction(_ tap: UITapGestureRecognizer) {
+    @objc override func singleTapAction(_ tap: UITapGestureRecognizer) {
         // 动画显示或者隐藏 maskView
-        // 自动消失
         mainMaskView.alpha = mainMaskView.alpha == 0 ? 1 : 0
         autoDelayFadeOutMaskView()
     }
+    
     /// 双击手势，在显示图片的时候是放大或者缩小，在显示视频的时候，是暂停或者播放
     @objc override func doubleTapAction(_ tap: UITapGestureRecognizer) {
         self.playButtonClicked(button: playPauseButton)
@@ -228,6 +229,11 @@ class VideoBrowserCell: PhotoBrowserCell {
         player.pause()
     }
     
+    override func dismiss() {
+        super.dismiss()
+        player.pause()
+    }
+    
     // MARK:- Override
     override func resizeCustomView(scale: CGFloat, rect: CGRect) {
         super.resizeCustomView(scale: scale, rect: rect)
@@ -242,6 +248,7 @@ class VideoBrowserCell: PhotoBrowserCell {
         self.playerView?.center = self.centerOfContentSize
         if needResetSize { self.playerView?.bounds.size = size }
     }
+    
     
     private func autoDelayFadeOutMaskView() {
         cancelAutoFadeOutMaskView()
@@ -278,7 +285,7 @@ class VideoBrowserCell: PhotoBrowserCell {
         let interval = CMTimeMake(1, 1)
         timeObserverToken = player.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main, using: { [weak self] time in
             let timeElapsed = Float(CMTimeGetSeconds(time))
-            self?.timeSlider.value = timeElapsed
+            self?.timeSlider.setValue(timeElapsed, animated: true)
             self?.currentTimeLabel.text = Util.formatVideoTime(TimeInterval(timeElapsed))
         }) as AnyObject?
     }
@@ -347,13 +354,6 @@ class VideoBrowserCell: PhotoBrowserCell {
         mainMaskView.addSubview(totalTimeLabel)
         mainMaskView.addSubview(timeSlider)
         
-        // 单击 显示/隐藏 maskView
-        let singleTap = UITapGestureRecognizer(target: self, action: Selector.singleTapAction)
-        contentView.addGestureRecognizer(singleTap)
-        let doubleTap = UITapGestureRecognizer(target: self, action: Selector.doubleTapAction)
-        doubleTap.numberOfTapsRequired = 2
-        singleTap.require(toFail: doubleTap)
-        contentView.addGestureRecognizer(doubleTap)
     }
     
     //MARK:- Layout
@@ -363,7 +363,6 @@ class VideoBrowserCell: PhotoBrowserCell {
         mainMaskView.frame = contentView.bounds
         
         if !isDismissing {
-            //            imageView.frame = fitFrame
             playerView?.frame = contentView.bounds
         }
         

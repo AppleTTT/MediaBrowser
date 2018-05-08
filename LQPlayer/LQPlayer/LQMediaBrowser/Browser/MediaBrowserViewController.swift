@@ -2,8 +2,8 @@
 //  MediaBrowserViewController.swift
 //  LQPlayer
 //
-//  Created by 李树 on 2018/3/26.
-//  Copyright © 2018年 laiqu. All rights reserved.
+//  Created by Lee on 2018/3/26.
+//  Copyright © 2018年 ATM. All rights reserved.
 //
 
 import UIKit
@@ -174,6 +174,14 @@ extension MediaBrowserViewController: UICollectionViewDelegate {
         if collectionView.visibleCells.count == 1 {
             let cell = collectionView.visibleCells.first
             currentIndexPath = collectionView.indexPath(for: cell!)!
+        }
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard lastCell != nil else { return }
+        if lastCell is VideoBrowserCell, !collectionView.visibleCells.contains(lastCell!) {
+            let videoBrowserCell = lastCell as! VideoBrowserCell
+            videoBrowserCell.cellDidDisappear()
         }
     }
 }

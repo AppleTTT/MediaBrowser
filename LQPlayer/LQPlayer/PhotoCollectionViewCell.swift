@@ -2,8 +2,8 @@
 //  PhotoCollectionViewCell.swift
 //  LQPlayer
 //
-//  Created by 李树 on 2018/3/8.
-//  Copyright © 2018年 laiqu. All rights reserved.
+//  Created by Lee on 2018/3/8.
+//  Copyright © 2018年 ATM. All rights reserved.
 //
 
 import UIKit
