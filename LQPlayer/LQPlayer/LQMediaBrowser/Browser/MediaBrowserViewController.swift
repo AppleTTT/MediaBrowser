@@ -56,6 +56,9 @@ class MediaBrowserViewController: UIViewController {
     /// 上一个 cell，用于将滑出屏幕的视频 reset
     var lastCell: UICollectionViewCell?
     
+    /// 预览界面是不会显示 statusBar 的，但是在拨打电话或者是开启热点的时候 statusBar 的高度会由 20 变为 40，因此这里要做下 UI 适配的处理
+    var statusBarHeight: CGFloat = UIApplication.shared.statusBarFrame.height - 20
+    
     lazy var collectionView: BrowserCollectionView = { [unowned self] in
         let collectionView = BrowserCollectionView(frame: view.bounds, collectionViewLayout: flowLayout)
         collectionView.backgroundColor = UIColor.clear
@@ -92,6 +95,8 @@ class MediaBrowserViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
+        
+        NotificationCenter.default.addObserver(self, selector: Selector.statusBarHeightChangedAction, name: .UIApplicationWillChangeStatusBarFrame, object: nil)
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -121,6 +126,13 @@ class MediaBrowserViewController: UIViewController {
         self.modalPresentationCapturesStatusBarAppearance = true
         presentingVC.present(self, animated: true, completion: nil)
     }
+    
+    // MARK:- Actions
+    @objc func statusBarHeightChangedAction(notification: Notification) {
+        statusBarHeight = UIApplication.shared.statusBarFrame.height - 20
+        view.layoutSubviews()
+    }
+    
     /// 添加视图
     private func setupViews() {
         view.addSubview(collectionView)
@@ -130,12 +142,9 @@ class MediaBrowserViewController: UIViewController {
         // flowLayout
         flowLayout.minimumLineSpacing = mediaSpace
         flowLayout.itemSize = view.bounds.size
-        collectionView.frame = view.bounds
+        // 之前是 view.bounds，后面由于开启 Hotspot 之后，这个值会变，因此改为如下
+        collectionView.frame = CGRect(x: 0, y: 0, width: view.bounds.size.width, height: view.bounds.size.height - statusBarHeight)
     }
-    
-//    override public var prefersStatusBarHidden: Bool {
-//        return true
-//    }
     
     private func coverStatusBar(_ cover: Bool) {
         let win = view.window ?? UIApplication.shared.keyWindow
@@ -258,6 +267,10 @@ extension MediaBrowserViewController: UICollectionViewDelegateFlowLayout {
         }
         return CGSize.init(width: 30, height: view.bounds.size.height)
     }
+}
+
+fileprivate extension Selector {
+    static let statusBarHeightChangedAction = #selector(MediaBrowserViewController.statusBarHeightChangedAction(notification:))
 }
 
 

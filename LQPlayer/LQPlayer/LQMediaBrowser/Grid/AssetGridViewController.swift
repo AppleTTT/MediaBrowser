@@ -26,6 +26,13 @@ class AssetGridViewController: UIViewController {
     fileprivate var thumbnailSize: CGSize!
     fileprivate var previousPreheatRect = CGRect.zero
     
+    var requestOptions: PHImageRequestOptions {
+        let requestOptions = PHImageRequestOptions.init()
+        requestOptions.deliveryMode = .opportunistic
+        requestOptions.resizeMode = .fast
+        return requestOptions
+    }
+    
     //MARK:- Life cycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,6 +61,15 @@ class AssetGridViewController: UIViewController {
         super.viewWillLayoutSubviews()
         updateItemSize()
     }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        
+        
+    }
+    
+    
+    
     //MARK:- Private funcs
     private func initUI() {
         let layout = UICollectionViewFlowLayout.init()
@@ -107,16 +123,23 @@ class AssetGridViewController: UIViewController {
         }
         // Determine the size of the thumbnails to request from the PHCachingImageManager
         let scale = UIScreen.main.scale
-        thumbnailSize = CGSize(width: itemSize.width * scale, height: itemSize.height * scale)
+        let thumbnailWidth = (viewWidth - sectionInset.left - sectionInset.right - minimumInteritemSpacing * (columns - 1)) / 4
+        thumbnailSize = CGSize(width: thumbnailWidth * scale, height: thumbnailWidth * scale)
     }
     
     private func updateCachedAssets() {
-        // 当视图可见的时候才更新
+        // Update only if the view is visible.
         guard isViewLoaded && view.window != nil else { return }
+        
+        // The preheat window is twice the height of the visible rect.
         let visibleRect = CGRect(origin: collectionView!.contentOffset, size: collectionView!.bounds.size)
         let preheatRect = visibleRect.insetBy(dx: 0, dy: -0.5 * visibleRect.height)
+        
+        // Update only if the visible area is significantly different from the last preheated area.
         let delta = abs(preheatRect.midY - previousPreheatRect.midY)
         guard delta > view.bounds.height / 3 else { return }
+        
+        // Compute the assets to start caching and to stop caching.
         let (addedRects, removedRects) = differencesBetweenRects(previousPreheatRect, preheatRect)
         let addedAssets = addedRects
             .flatMap { rect in collectionView!.indexPathsForElements(in: rect) }
@@ -125,10 +148,13 @@ class AssetGridViewController: UIViewController {
             .flatMap { rect in collectionView!.indexPathsForElements(in: rect) }
             .map { indexPath in fetchResult.object(at: indexPath.item) }
         
+        // Update the assets the PHCachingImageManager is caching.
         imageManager.startCachingImages(for: addedAssets,
-                                        targetSize: thumbnailSize, contentMode: .aspectFill, options: nil)
+                                        targetSize: thumbnailSize, contentMode: .aspectFill, options: requestOptions)
         imageManager.stopCachingImages(for: removedAssets,
-                                       targetSize: thumbnailSize, contentMode: .aspectFill, options: nil)
+                                       targetSize: thumbnailSize, contentMode: .aspectFill, options: requestOptions)
+        
+        // Store the preheat rect to compare against in the future.
         previousPreheatRect = preheatRect
     }
     
@@ -198,28 +224,23 @@ extension AssetGridViewController: UICollectionViewDataSource {
         return reuseableHeader
     }
     
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let model = sectionDic[allKeys[indexPath.section]]![indexPath.row]
         let asset = model.asset!
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: String(describing: GridViewCell.self), for: indexPath) as? GridViewCell else {
             fatalError("unexpected cell in collection view")
         }
+        if cell.tag != 0 { imageManager.cancelImageRequest(PHImageRequestID(cell.tag)) }
         
-        if #available(iOS 9.1, *) {
-            if asset.mediaSubtypes.contains(.photoLive) {
-                cell.livePhotoBadgeImage = PHLivePhotoView.livePhotoBadgeImage(options: .overContent)
-            }
-        } else {
-            // Fallback on earlier versions
-        }
         cell.representedAssetIdentifier = asset.localIdentifier
-        imageManager.requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: nil, resultHandler: { image, _ in
+        cell.tag = Int(imageManager.requestImage(for: asset, targetSize: thumbnailSize, contentMode: .aspectFill, options: requestOptions, resultHandler: { image, _ in
             // The cell may have been recycled by the time this handler gets called;
             // set the cell's thumbnail image only if it's still showing the same asset.
             if cell.representedAssetIdentifier == asset.localIdentifier && image != nil {
                 cell.thumbnailImage = image
             }
-        })
+        }))
         cell.refreshCell(with: model)
         return cell
     }

@@ -40,11 +40,12 @@ class GridViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = UIColor.clear
+        clipsToBounds = true
         
         imageView = UIImageView.init()
         imageView.contentMode = .scaleAspectFill
-        imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 8
+//        imageView.clipsToBounds = true
+//        imageView.layer.cornerRadius = 8
         contentView.addSubview(imageView)
         
         livePhotoBadgeImageView = UIImageView.init()
@@ -58,6 +59,17 @@ class GridViewCell: UICollectionViewCell {
         durationLable.backgroundColor = UIColor.clear
         contentView.addSubview(durationLable)
         
+        imageView.frame = contentView.bounds
+        livePhotoBadgeImageView.snp.updateConstraints { (make) in
+            make.left.top.equalTo(contentView).offset(0)
+            make.width.height.equalTo(28)
+        }
+        
+        durationLable.snp.updateConstraints { (make) in
+            make.bottom.right.equalTo(contentView).offset(-6)
+            make.height.equalTo(14)
+        }
+        
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -66,16 +78,8 @@ class GridViewCell: UICollectionViewCell {
     
     //MARK:- Layout
     override func layoutSubviews() {
-        imageView.frame = contentView.bounds
-        livePhotoBadgeImageView.snp.remakeConstraints { (make) in
-            make.left.top.equalTo(contentView).offset(0)
-            make.width.height.equalTo(28)
-        }
+        super.layoutSubviews()
         
-        durationLable.snp.remakeConstraints { (make) in
-            make.bottom.right.equalTo(contentView).offset(-6)
-            make.height.equalTo(14)
-        }
     }
     
     //MARK:- APIs
